@@ -4,7 +4,7 @@ define('BASE_PATH', dirname(__DIR__));
 define('BASE_URL', '/voicehub/public');
 
 // Incluir o autoloader do Composer
-/*require_once BASE_PATH . '/vendor/autoload.php';*/
+require_once BASE_PATH . '/vendor/autoload.php';
 
 // Função de autoload para os controllers
 spl_autoload_register(function ($class_name) {
