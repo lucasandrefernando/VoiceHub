@@ -1,0 +1,561 @@
+/* Variáveis de cores principais */
+:root {
+    --primary-white: #ffffff;
+    --primary-red: #e74c3c;
+    --primary-black: #2c3e50;
+    --primary-blue: #3498db;
+    --light-gray: #f5f7fa;
+    --dark-gray: #7f8c8d;
+}
+
+/* Estilos gerais */
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, var(--light-gray) 0%, #c3cfe2 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    color: var(--primary-black);
+}
+
+/* Container principal */
+.permissions-container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 30px;
+    background-color: var(--primary-white);
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Título principal */
+h1 {
+    text-align: center;
+    color: var(--primary-black);
+    margin-bottom: 30px;
+    font-size: 2.5em;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    border-bottom: 3px solid var(--primary-blue);
+    padding-bottom: 10px;
+}
+
+/* Layout do conteúdo principal com altura fixa */
+.content-wrapper {
+    display: flex;
+    gap: 30px;
+    height: 500px;
+    /* Altura fixa */
+    overflow: hidden;
+    /* Evita scroll na wrapper */
+}
+
+/* Painel de lista de usuários */
+.user-list-panel {
+    flex: 1;
+    max-width: 450px;
+    background-color: var(--primary-white);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Área de scroll da lista de usuários */
+.user-list-scroll {
+    flex-grow: 1;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary-blue) var(--light-gray);
+}
+
+.user-list-scroll::-webkit-scrollbar {
+    width: 8px;
+}
+
+.user-list-scroll::-webkit-scrollbar-track {
+    background: var(--light-gray);
+}
+
+.user-list-scroll::-webkit-scrollbar-thumb {
+    background-color: var(--primary-blue);
+    border-radius: 20px;
+}
+
+/* Painel de permissões */
+.permissions-panel {
+    flex: 2;
+    background-color: var(--primary-white);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    overflow-y: auto;
+}
+
+/* Títulos de seção */
+h2 {
+    color: var(--primary-blue);
+    border-bottom: 2px solid var(--primary-blue);
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+    font-size: 1.8em;
+}
+
+/* Container de busca */
+.search-container {
+    position: relative;
+    margin-bottom: 20px;
+}
+
+/* Ícone de busca */
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--dark-gray);
+    font-size: 1.2em;
+}
+
+/* Campo de busca */
+#userSearch {
+    width: 100%;
+    padding: 12px 12px 12px 45px;
+    border: 2px solid var(--light-gray);
+    border-radius: 25px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+}
+
+#userSearch:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+/* Item de usuário na lista */
+.user-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid var(--light-gray);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-item:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+    transform: translateY(-2px);
+}
+
+.user-item.active {
+    background-color: rgba(52, 152, 219, 0.2);
+    border-left: 4px solid var(--primary-blue);
+}
+
+/* Avatar do usuário */
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin-right: 15px;
+    object-fit: cover;
+    border: 2px solid var(--primary-blue);
+}
+
+/* Informações do usuário */
+.user-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.user-name {
+    font-weight: bold;
+    color: var(--primary-black);
+    font-size: 1.1em;
+    margin-bottom: 3px;
+}
+
+.user-email {
+    font-size: 0.9em;
+    color: var(--dark-gray);
+}
+
+/* Placeholder para as permissões */
+.permissions-placeholder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 200px;
+    background-color: var(--light-gray);
+    border-radius: 10px;
+    font-size: 18px;
+    color: var(--dark-gray);
+    text-align: center;
+}
+
+.permissions-placeholder i {
+    font-size: 48px;
+    margin-bottom: 15px;
+    color: var(--primary-blue);
+}
+
+/* Seções de permissões */
+.permissions-sections {
+    display: flex;
+    gap: 20px;
+}
+
+.permissions-column {
+    flex: 1;
+}
+
+.permissions-group {
+    background-color: var(--light-gray);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.permissions-group:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.permissions-group h3 {
+    color: var(--primary-black);
+    margin-bottom: 15px;
+    font-size: 1.4em;
+    border-bottom: 2px solid var(--primary-blue);
+    padding-bottom: 10px;
+}
+
+/* Item de permissão */
+.permission-item {
+    margin-bottom: 15px;
+    padding: 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.permission-item:hover {
+    background-color: rgba(52, 152, 219, 0.1);
+}
+
+.permissions-placeholder {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 85%;
+    background-color: var(--light-gray);
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    color: var(--primary-black);
+}
+
+.permissions-placeholder i {
+    font-size: 64px;
+    margin-bottom: 20px;
+    color: var(--primary-blue);
+}
+
+.permissions-placeholder h3 {
+    font-size: 24px;
+    margin-bottom: 15px;
+    color: var(--primary-blue);
+}
+
+.permissions-placeholder p {
+    font-size: 16px;
+    max-width: 300px;
+    line-height: 1.6;
+}
+
+/* Toggle switch para permissões */
+.toggle {
+    display: flex;
+    align-items: center;
+}
+
+.toggle input {
+    display: none;
+}
+
+.slider {
+    position: relative;
+    width: 50px;
+    height: 24px;
+    background-color: var(--dark-gray);
+    border-radius: 12px;
+    margin-right: 15px;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 2px;
+    bottom: 2px;
+    background-color: var(--primary-white);
+    border-radius: 50%;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: var(--primary-blue);
+}
+
+input:checked+.slider:before {
+    transform: translateX(26px);
+}
+
+.label {
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Container do código de verificação */
+#verificationCodeContainer {
+    background-color: rgba(52, 152, 219, 0.1);
+    border-radius: 8px;
+    padding: 20px;
+    margin-top: 20px;
+    border: 1px solid var(--primary-blue);
+}
+
+#verificationCodeInputContainer {
+    margin-top: 15px;
+}
+
+#verificationCode {
+    width: 100%;
+    padding: 12px;
+    margin-top: 10px;
+    border: 2px solid var(--primary-blue);
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* Botões */
+.btn-primary,
+.btn-secondary,
+.btn-save {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.btn-primary {
+    background-color: var(--primary-blue);
+    color: var(--primary-white);
+}
+
+.btn-secondary {
+    background-color: var(--primary-red);
+    color: var(--primary-white);
+}
+
+.btn-save {
+    background-color: #4CAF50;
+    color: var(--primary-white);
+    width: 100%;
+    margin-top: 20px;
+}
+
+.btn-primary:hover,
+.btn-secondary:hover,
+.btn-save:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Estilos para os modais melhorados */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-content {
+    background-color: var(--primary-white);
+    margin: 5% auto;
+    padding: 30px;
+    border: none;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-content h2 {
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+    font-size: 1.8em;
+    border-bottom: 2px solid var(--primary-blue);
+    padding-bottom: 10px;
+}
+
+.modal-content p {
+    margin-bottom: 20px;
+    line-height: 1.6;
+    color: var(--primary-black);
+}
+
+.modal-content ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.modal-content li {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--light-gray);
+}
+
+.modal-content button {
+    margin-top: 20px;
+}
+
+/* Paginação compacta */
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    background-color: var(--light-gray);
+    border-radius: 25px;
+    padding: 5px;
+}
+
+.pagination button {
+    background-color: var(--primary-blue);
+    color: var(--primary-white);
+    border: none;
+    padding: 8px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 14px;
+}
+
+.pagination button:hover {
+    background-color: #2980b9;
+}
+
+.pagination button:disabled {
+    background-color: var(--dark-gray);
+    cursor: not-allowed;
+}
+
+#pageInfo {
+    font-size: 14px;
+    color: var(--primary-black);
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+
+    .content-wrapper,
+    .permissions-sections {
+        flex-direction: column;
+        height: auto;
+    }
+
+    .user-list-panel,
+    .permissions-panel,
+    .permissions-column {
+        max-width: 100%;
+    }
+
+    .user-list-panel {
+        height: 500px;
+    }
+}
+
+@media (max-width: 768px) {
+    .permissions-container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    .btn-primary,
+    .btn-secondary,
+    .btn-save {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+    }
+}
+
+/* Ícones */
+.fas {
+    margin-right: 8px;
+}
+
+/* Animações */
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}

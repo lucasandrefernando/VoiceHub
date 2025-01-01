@@ -1,0 +1,79 @@
+body {
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.recordings-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.recording-item {
+    background-color: #ffffff;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.recording-info {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.recording-name {
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.recording-date {
+    color: #7f8c8d;
+}
+
+.player {
+    width: 100%;
+    margin-bottom: 15px;
+}
+
+.transcribe-btn {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.transcribe-btn:hover {
+    background-color: #2980b9;
+}
+
+.transcribe-btn:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
+}
+
+.transcript {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #ecf0f1;
+    border-radius: 4px;
+    font-style: italic;
+}

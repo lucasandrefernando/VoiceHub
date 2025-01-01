@@ -1,0 +1,262 @@
+:root {
+    --primary-red: #FF0000;
+    --primary-blue: #0000FF;
+    --white: #FFFFFF;
+    --black: #000000;
+    --light-gray: #F0F2F5;
+}
+
+/* Estilos gerais */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--light-gray);
+    color: var(--black);
+}
+
+/* Header */
+.app-header {
+    background: linear-gradient(135deg, var(--black) 0%, var(--primary-red) 100%);
+    position: relative;
+}
+
+.navbar {
+    padding: 1rem 0;
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.8rem;
+    color: var(--white);
+    display: flex;
+    align-items: center;
+}
+
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: var(--white);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+/* Efeito de onda */
+.wave-container {
+    position: relative;
+    height: 40px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.waves {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 40px;
+    min-height: 40px;
+    max-height: 40px;
+}
+
+.parallax>use {
+    animation: move-forever 25s cubic-bezier(.55, .5, .45, .5) infinite;
+}
+
+.parallax>use:nth-child(1) {
+    animation-delay: -2s;
+    animation-duration: 7s;
+    fill: rgba(255, 255, 255, 0.7);
+}
+
+.parallax>use:nth-child(2) {
+    animation-delay: -3s;
+    animation-duration: 10s;
+    fill: rgba(255, 255, 255, 0.5);
+}
+
+.parallax>use:nth-child(3) {
+    animation-delay: -4s;
+    animation-duration: 13s;
+    fill: rgba(255, 255, 255, 0.3);
+}
+
+.parallax>use:nth-child(4) {
+    animation-delay: -5s;
+    animation-duration: 20s;
+    fill: var(--white);
+}
+
+@keyframes move-forever {
+    0% {
+        transform: translate3d(-90px, 0, 0);
+    }
+
+    100% {
+        transform: translate3d(85px, 0, 0);
+    }
+}
+
+/* Conteúdo principal */
+.app-content {
+    padding: 2rem 0;
+}
+
+/* Footer */
+.app-footer {
+    background: linear-gradient(135deg, var(--primary-red) 0%, var(--black) 100%);
+    color: var(--white);
+    padding: 1rem 0;
+    position: relative;
+}
+
+.app-footer .wave-container {
+    transform: rotate(180deg);
+    position: absolute;
+    top: -40px;
+    left: 0;
+    width: 100%;
+}
+
+/* Logo Eagle */
+.logo-container {
+    --circle-width: 100px;
+    --circle-height: 100px;
+    --circle-color: white;
+    --eagle-font-size: 28px;
+    --eagle-color: #D93438;
+    --eagle-top: 50%;
+    --eagle-left: 40%;
+    --telecom-font-size: 9px;
+    --telecom-color: #293154;
+    --telecom-bottom: 30px;
+    --telecom-left: 55%;
+    --mini-logo-width: 40px;
+    --mini-logo-height: 40px;
+    --mini-logo-top: 10px;
+    --mini-logo-left: 3px;
+
+    display: flex;
+    align-items: center;
+}
+
+.eagle-logo {
+    position: relative;
+    margin-right: 20px;
+    width: var(--circle-width);
+    height: var(--circle-height);
+    background-color: var(--circle-color);
+    border-radius: 50%;
+    overflow: visible;
+}
+
+.eagle-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.eagle {
+    position: absolute;
+    top: var(--eagle-top);
+    left: var(--eagle-left);
+    transform: translate(-50%, -50%);
+    font-size: var(--eagle-font-size);
+    font-weight: bold;
+    color: var(--eagle-color);
+    text-transform: lowercase;
+    letter-spacing: -1px;
+}
+
+.eagle .a {
+    font-family: 'Arial', sans-serif;
+}
+
+.telecom {
+    position: absolute;
+    font-size: var(--telecom-font-size);
+    color: var(--telecom-color);
+    text-transform: lowercase;
+    letter-spacing: 0.9px;
+    bottom: var(--telecom-bottom);
+    left: var(--telecom-left);
+    white-space: nowrap;
+}
+
+.mini-logo {
+    position: absolute;
+    width: var(--mini-logo-width);
+    height: var(--mini-logo-height);
+    top: var(--mini-logo-top);
+    left: var(--mini-logo-left);
+    object-fit: contain;
+    z-index: 2;
+}
+
+/* Efeito de ondas pulsantes ampliado */
+.eagle-logo::before,
+.eagle-logo::after {
+    content: '';
+    position: absolute;
+    top: -5px;
+    left: -5px;
+    right: -5px;
+    bottom: -5px;
+    border-radius: 50%;
+    border: 3px solid rgba(217, 52, 56, 0.7);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.eagle-logo::after {
+    animation: pulse 2s infinite;
+}
+
+.eagle-logo:hover::before,
+.eagle-logo:hover::after {
+    opacity: 1;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    70% {
+        transform: scale(1.2);
+        opacity: 0.3;
+    }
+    100% {
+        transform: scale(1.4);
+        opacity: 0;
+    }
+}
+/* Responsividade */
+@media (max-width: 768px) {
+    .wave-container {
+        height: 20px;
+    }
+
+    .waves {
+        height: 20px;
+        min-height: 20px;
+        max-height: 20px;
+    }
+
+    .app-footer .wave-container {
+        top: -20px;
+    }
+
+    .logo-container {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .eagle-logo {
+        margin-bottom: 10px;
+    }
+}
