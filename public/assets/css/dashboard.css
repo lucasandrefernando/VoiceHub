@@ -1,4 +1,4 @@
-/* Estilos básicos para garantir que o footer fique no fim da página */
+/* Estilos gerais para o corpo e estrutura da página */
 html,
 body {
     height: 100%;
@@ -26,14 +26,16 @@ body {
     --dark-gray: #333333;
 }
 
-/* Estilos do container principal */
+/* Container principal do dashboard */
 .dashboard-container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 20px;
+    animation: fadeIn 0.5s ease-in-out;
+    /* Animação suave ao carregar */
 }
 
-/* Estilos do cabeçalho da dashboard */
+/* Estilos do cabeçalho do dashboard */
 .dashboard-header {
     display: flex;
     justify-content: space-between;
@@ -45,6 +47,7 @@ body {
     box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
+/* Estilos para as informações do usuário */
 .user-info {
     display: flex;
     align-items: center;
@@ -72,12 +75,13 @@ body {
     font-size: 1.5em;
 }
 
+/* Estilos para as informações da empresa */
 .company-info {
     color: var(--primary-white);
     text-align: right;
 }
 
-/* Estilos dos cards de estatísticas gerais */
+/* Estilos para os cards de estatísticas */
 .stats-container {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -119,7 +123,7 @@ body {
     margin: 5px 0;
 }
 
-/* Estilos da seção de administrador */
+/* Estilos para a seção de administrador */
 .admin-section {
     background-color: var(--primary-white);
     border-radius: 15px;
@@ -185,6 +189,7 @@ body {
     flex-grow: 1;
 }
 
+/* Estilos para os botões de ação do administrador */
 .admin-btn {
     display: inline-block;
     padding: 10px 20px;
@@ -216,7 +221,7 @@ body {
     box-shadow: none;
 }
 
-/* Estilos da seção de estatísticas do administrador */
+/* Estilos para as estatísticas do administrador */
 .admin-stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -257,7 +262,7 @@ body {
     margin: 0;
 }
 
-/* Estilos do footer */
+/* Estilos para o footer */
 .footer {
     flex-shrink: 0;
     background-color: var(--primary-blue);
@@ -271,29 +276,71 @@ body {
 #permissionDeniedModal .modal-content {
     border: none;
     border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
 }
 
 #permissionDeniedModal .modal-header {
+    background-color: #dc3545;
+    color: white;
     border-top-left-radius: 15px;
     border-top-right-radius: 15px;
+    padding: 1.5rem;
+}
+
+#permissionDeniedModal .modal-title {
+    font-size: 1.5rem;
+    font-weight: bold;
 }
 
 #permissionDeniedModal .modal-body {
     padding: 2rem;
+    text-align: center;
 }
 
 #permissionDeniedModal .fa-exclamation-triangle {
     color: #ffc107;
+    font-size: 4rem;
+    margin-bottom: 1rem;
 }
 
-#permissionDeniedModal .btn-primary {
-    background-color: #007bff;
-    border-color: #007bff;
+#permissionDeniedModal #permissionDeniedMessage {
+    font-size: 1.1rem;
+    color: #333;
 }
 
-#permissionDeniedModal .btn-primary:hover {
-    background-color: #0056b3;
-    border-color: #0056b3;
+#permissionDeniedModal .modal-footer {
+    border-top: none;
+    justify-content: center;
+    padding: 1.5rem;
+}
+
+#permissionDeniedModal .btn-secondary {
+    background-color: #6c757d;
+    border: none;
+    padding: 0.75rem 2rem;
+    font-size: 1rem;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+#permissionDeniedModal .btn-secondary:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Estilo para o backdrop do modal */
+.modal-backdrop {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+/* Animação para o modal */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+    transform: scale(0.8);
+}
+
+.modal.show .modal-dialog {
+    transform: scale(1);
 }
 
 /* Media queries para responsividade */
@@ -342,8 +389,4 @@ body {
     to {
         opacity: 1;
     }
-}
-
-.dashboard-container {
-    animation: fadeIn 0.5s ease-in-out;
 }

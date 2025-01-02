@@ -85,18 +85,32 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         showLoading();
-        fetch(`${BASE_URL}/admin/get-user-permissions/${userId}`)
+        fetch(`${BASE_URL}/admin/get-user-permissions/${userId}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            credentials: 'include'
+        })
             .then(response => {
-                if (!response.ok) throw new Error('Network response was not ok');
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Network response was not ok (${response.status}): ${text}`);
+                    });
+                }
                 return response.json();
             })
             .then(data => {
-                renderPermissions(data);
-                originalPermissions = { ...data.permissions };
+                if (data.success) {
+                    renderPermissions(data);
+                    originalPermissions = { ...data.permissions };
+                } else {
+                    throw new Error(data.error || 'Erro desconhecido ao carregar permissões');
+                }
             })
             .catch(error => {
                 console.error('Error:', error);
-                showNotification('Erro ao carregar permissões do usuário.', 'error');
+                showNotification('Erro ao carregar permissões do usuário: ' + error.message, 'error');
             })
             .finally(hideLoading);
     }

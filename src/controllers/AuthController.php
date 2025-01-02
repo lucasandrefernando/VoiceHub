@@ -28,15 +28,23 @@ class AuthController
             $password = $_POST['password'] ?? '';
             $verificationCode = $_POST['verification_code'] ?? '';
 
-            $stmt = $this->db->prepare("SELECT id, password, is_confirmed, name, email, company_id, verification_code, is_admin FROM users WHERE email = ?");
+            $stmt = $this->db->prepare("SELECT id, password, is_confirmed, name, email, company_id, verification_code FROM users WHERE email = ?");
             $stmt->execute([$email]);
             $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($user && password_verify($password, $user['password'])) {
                 if ($user['is_confirmed']) {
-                    $this->setUserSession($user);
+                    // Carregar as permissões do usuário
+                    $userPermissions = $this->getUserPermissions($user['id']);
 
-                    error_log("User logged in. Is admin: " . ($user['is_admin'] == 1 ? 'Yes' : 'No'));
+                    // Configurar a sessão do usuário
+                    $_SESSION['user_id'] = $user['id'];
+                    $_SESSION['user_name'] = $user['name'];
+                    $_SESSION['user_email'] = $user['email'];
+                    $_SESSION['company_id'] = $user['company_id'];
+                    $_SESSION['user_permissions'] = $userPermissions;
+
+                    error_log("User Permissions after login: " . print_r($userPermissions, true));
 
                     // Atualizar o status do usuário para ativo
                     $stmt = $this->db->prepare("UPDATE users SET is_active = TRUE WHERE id = ?");
@@ -47,7 +55,12 @@ class AuthController
                     if ($verificationCode) {
                         if ($verificationCode === $user['verification_code']) {
                             $this->confirmUser($user['id']);
-                            $this->setUserSession($user);
+                            $userPermissions = $this->getUserPermissions($user['id']);
+                            $_SESSION['user_id'] = $user['id'];
+                            $_SESSION['user_name'] = $user['name'];
+                            $_SESSION['user_email'] = $user['email'];
+                            $_SESSION['company_id'] = $user['company_id'];
+                            $_SESSION['user_permissions'] = $userPermissions;
                             $responseData = ['success' => true, 'redirect' => BASE_URL . '/dashboard'];
                         } else {
                             $responseData = ['success' => false, 'message' => 'Código de verificação incorreto.'];
@@ -69,6 +82,18 @@ class AuthController
         }
 
         require_once BASE_PATH . '/src/views/auth/login.php';
+    }
+
+    private function getUserPermissions($userId)
+    {
+        $stmt = $this->db->prepare("SELECT permission_key, value FROM user_permissions WHERE user_id = ?");
+        $stmt->execute([$userId]);
+        $permissions = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+
+        // Converter os valores para booleanos
+        return array_map(function ($value) {
+            return $value == 1;
+        }, $permissions);
     }
 
     public function checkFirstAccess()

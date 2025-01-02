@@ -43,7 +43,7 @@ class UserPermissionsController
     public function index()
     {
         // Verifica se o usuário é um administrador
-        if (!isAdmin()) {
+        if (!isset($_SESSION['user_permissions']['administrador_sistema']) || !$_SESSION['user_permissions']['administrador_sistema']) {
             header("Location: " . BASE_URL . "/dashboard");
             exit();
         }
@@ -60,25 +60,40 @@ class UserPermissionsController
     {
         if (!isAdmin()) {
             header("HTTP/1.0 403 Forbidden");
+            echo json_encode(['error' => 'Acesso não autorizado']);
             exit();
         }
 
-        // Busque as permissões do usuário
-        $stmt = $this->db->prepare("SELECT permission_key FROM user_permissions WHERE user_id = ? AND value = 1");
-        $stmt->execute([$userId]);
-        $userPermissions = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        try {
+            $stmt = $this->db->prepare("SELECT permission_key, value FROM user_permissions WHERE user_id = ?");
+            $stmt->execute([$userId]);
+            $permissions = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
-        // Crie um array associativo com todas as permissões e seus estados
-        $permissions = [];
-        foreach (self::$allPermissions as $key => $label) {
-            $permissions[$key] = in_array($key, $userPermissions);
+            $allPermissions = [
+                'gravacoes' => 'Gravações',
+                'transcricoes' => 'Transcrições',
+                'relatorio_inteligente' => 'Relatório Inteligente',
+                'gerenciar_licencas' => 'Gerenciar Licenças',
+                'gerenciar_empresas' => 'Gerenciar empresas',
+                'administrador_sistema' => 'Admin do Sistema'
+            ];
+
+            $formattedPermissions = [];
+            foreach ($allPermissions as $key => $label) {
+                $formattedPermissions[$key] = isset($permissions[$key]) && $permissions[$key] == 1;
+            }
+
+            header('Content-Type: application/json');
+            echo json_encode([
+                'success' => true,
+                'permissions' => $formattedPermissions,
+                'labels' => $allPermissions
+            ]);
+        } catch (Exception $e) {
+            error_log("Erro ao obter permissões do usuário: " . $e->getMessage());
+            header("HTTP/1.0 500 Internal Server Error");
+            echo json_encode(['error' => 'Erro ao obter permissões do usuário']);
         }
-
-        header('Content-Type: application/json');
-        echo json_encode([
-            'permissions' => $permissions,
-            'labels' => self::$allPermissions
-        ]);
     }
 
     // Método para atualizar as permissões de um usuário

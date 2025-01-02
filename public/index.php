@@ -49,6 +49,8 @@ if (file_exists(BASE_PATH . '/src/helpers/functions.php')) {
     require_once BASE_PATH . '/src/helpers/functions.php';
 }
 
+require_once BASE_PATH . '/src/controllers/UserPermissionsController.php';
+
 // Iniciar a sessão
 session_start();
 
@@ -69,7 +71,7 @@ function isLoggedIn()
  */
 function isAdmin()
 {
-    return isset($_SESSION['user_id']) && isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
+    return isset($_SESSION['user_permissions']['administrador_sistema']) && $_SESSION['user_permissions']['administrador_sistema'] == 1;
 }
 
 // Obter a URI atual e remover o prefixo '/voicehub/public'
@@ -148,7 +150,7 @@ switch ($request_uri) {
         break;
 
     case '/companies':
-        if (isAdmin() && isset($_SESSION['user_permissions']['gerenciar_empresas']) && $_SESSION['user_permissions']['gerenciar_empresas'] == 1) {
+        if (isset($_SESSION['user_permissions']['gerenciar_empresas']) && $_SESSION['user_permissions']['gerenciar_empresas'] == 1) {
             $controller = new CompanyController();
             $controller->index();
         } else {
@@ -210,22 +212,6 @@ switch ($request_uri) {
         }
         break;
 
-    case '/recordings':
-        // Página de gravações
-        if (isLoggedIn()) {
-            $controller = new RecordingController();
-            $controller->index();
-        } else {
-            header("Location: " . BASE_URL . "/login");
-            exit();
-        }
-        break;
-
-    case (preg_match('/^\/recording\/([a-f0-9]{32})$/', $request_uri, $matches) ? true : false):
-        $recordingId = $matches[1];
-        $controller = new RecordingController();
-        $controller->view($recordingId);
-        break;
 
     case '/admin':
         // Página de administração
@@ -261,11 +247,11 @@ switch ($request_uri) {
         break;
 
     case '/admin/user-permissions':
-        if (isAdmin()) {
+        if (isset($_SESSION['user_permissions']['administrador_sistema']) && $_SESSION['user_permissions']['administrador_sistema']) {
             $controller = new UserPermissionsController();
             $controller->index();
         } else {
-            header("Location: " . BASE_URL . "/login");
+            header("Location: " . BASE_URL . "/dashboard");
             exit();
         }
         break;
@@ -286,23 +272,7 @@ switch ($request_uri) {
         $controller->resendVerificationCode();
         break;
 
-    case (preg_match('/^\/recording\/(\d+)$/', $request_uri, $matches) ? true : false):
-        // Visualizar gravação específica
-        if (isLoggedIn()) {
-            try {
-                $recordingId = $matches[1];
-                $controller = new RecordingController();
-                $controller->view($recordingId);
-            } catch (Exception $e) {
-                error_log("Erro ao visualizar gravação: " . $e->getMessage());
-                header("HTTP/1.0 500 Internal Server Error");
-                echo "Erro ao carregar a gravação. Por favor, tente novamente mais tarde.";
-            }
-        } else {
-            header("Location: " . BASE_URL . "/login");
-            exit();
-        }
-        break;
+
 
     case '/profile':
         // Página de perfil do usuário
@@ -335,8 +305,9 @@ switch ($request_uri) {
             $controller->getUserPermissions($userId);
         } else {
             header("HTTP/1.0 403 Forbidden");
-            exit();
+            echo json_encode(['error' => 'Acesso não autorizado']);
         }
+        exit();
         break;
 
     case '/admin/verify-code':

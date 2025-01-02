@@ -8,6 +8,15 @@
     var BASE_URL = "<?php echo BASE_URL; ?>";
 </script>
 
+<!-- Adicionar verificação de debug -->
+<?php
+if (isset($_GET['debug'])) {
+    echo "<pre>";
+    print_r($userPermissions);
+    echo "</pre>";
+}
+?>
+
 <!-- Corpo principal do dashboard -->
 <div class="page-wrapper">
     <div class="dashboard-container">
@@ -70,7 +79,11 @@
                                 <h4>Controle de Permissões</h4>
                             </div>
                             <p>Gerencie as permissões dos usuários</p>
-                            <a href="<?php echo BASE_URL; ?>/admin/user-permissions" class="admin-btn">Acessar</a>
+                            <?php if (isset($_SESSION['user_permissions']['administrador_sistema']) && $_SESSION['user_permissions']['administrador_sistema']): ?>
+                                <a href="<?php echo BASE_URL; ?>/admin/user-permissions" class="admin-btn">Acessar</a>
+                            <?php else: ?>
+                                <button class="admin-btn disabled" onclick="showPermissionDeniedModal('Controle de Permissões')">Acessar</button>
+                            <?php endif; ?>
                         </div>
                         <!-- Card: Gerenciar Empresas -->
                         <div class="admin-card">
@@ -79,14 +92,11 @@
                                 <h4>Gerenciar Empresas</h4>
                             </div>
                             <p>Administre as empresas cadastradas</p>
-
-                            <a href="<?php echo isset($userPermissions['gerenciar_empresas']) && $userPermissions['gerenciar_empresas'] == 1 ? BASE_URL . '/companies' : '#'; ?>"
-                                class="admin-btn <?php echo isset($userPermissions['gerenciar_empresas']) && $userPermissions['gerenciar_empresas'] == 1 ? '' : 'disabled'; ?>"
-                                data-permission="gerenciar_empresas"
-                                <?php echo isset($userPermissions['gerenciar_empresas']) && $userPermissions['gerenciar_empresas'] == 1 ? '' : 'onclick="return false;"'; ?>>
-                                Acessar
-                            </a>
-
+                            <?php if (isset($_SESSION['user_permissions']['gerenciar_empresas']) && $_SESSION['user_permissions']['gerenciar_empresas'] == 1): ?>
+                                <a href="<?php echo BASE_URL; ?>/companies" class="admin-btn">Acessar</a>
+                            <?php else: ?>
+                                <button class="admin-btn disabled" onclick="showPermissionDeniedModal('Gerenciar Empresas')">Acessar</button>
+                            <?php endif; ?>
                         </div>
                         <!-- Card: Gerenciar Licenças -->
                         <div class="admin-card">
@@ -95,7 +105,11 @@
                                 <h4>Gerenciar Licenças</h4>
                             </div>
                             <p>Controle as licenças ativas</p>
-                            <a href="#" class="admin-btn <?php echo isset($userPermissions['gerenciar_licencas']) && $userPermissions['gerenciar_licencas'] == 1 ? '' : 'disabled'; ?>" data-permission="gerenciar_licencas">Acessar</a>
+                            <?php if (isset($userPermissions['gerenciar_licencas']) && $userPermissions['gerenciar_licencas']): ?>
+                                <a href="<?php echo BASE_URL; ?>/licenses" class="admin-btn">Acessar</a>
+                            <?php else: ?>
+                                <button class="admin-btn disabled" onclick="showPermissionDeniedModal('Gerenciar Licenças')">Acessar</button>
+                            <?php endif; ?>
                         </div>
                     </div>
                     <!-- Estatísticas do administrador -->
