@@ -149,40 +149,38 @@ switch ($request_uri) {
         }
         break;
 
+
     case '/companies':
-        if (isset($_SESSION['user_permissions']['gerenciar_empresas']) && $_SESSION['user_permissions']['gerenciar_empresas'] == 1) {
-            $controller = new CompanyController();
-            $controller->index();
-        } else {
-            header("Location: " . BASE_URL . "/dashboard");
-            exit();
-        }
+        $controller = new CompanyController();
+        $controller->index();
         break;
 
-    case '/companies/create':
-        if (isAdmin() && isset($_SESSION['user_permissions']['gerenciar_empresas']) && $_SESSION['user_permissions']['gerenciar_empresas'] == 1) {
-            $controller = new CompanyController();
-            $controller->create();
-        } else {
-            header("Location: " . BASE_URL . "/dashboard");
-            exit();
-        }
+    case (preg_match('/^\/companies\/create$/', $request_uri) ? true : false):
+        $controller = new CompanyController();
+        $controller->create();
         break;
 
-    case '/companies/store':
-        if (isAdmin() && isset($_SESSION['user_permissions']['gerenciar_empresas']) && $_SESSION['user_permissions']['gerenciar_empresas'] == 1) {
-            $controller = new CompanyController();
-            $controller->store();
-        } else {
-            header("Location: " . BASE_URL . "/dashboard");
-            exit();
-        }
+    case (preg_match('/^\/companies\/update\/(\d+)$/', $request_uri, $matches) ? true : false):
+        $controller = new CompanyController();
+        $controller->update($matches[1]);
         break;
+
+    case (preg_match('/^\/companies\/delete\/(\d+)$/', $request_uri, $matches) ? true : false):
+        $controller = new CompanyController();
+        $controller->delete($matches[1]);
+        break;
+
+
 
     case '/new-password':
         // Página para definir nova senha
         $controller = new AuthController();
         $controller->newPassword();
+        break;
+
+    case '/companies/search-cnpj':
+        $controller = new CompanyController();
+        $controller->searchByCNPJ();
         break;
 
     case '/verify-code':

@@ -11,7 +11,7 @@
     RewriteRule ^ - [L]
 
     # Redirecionar todas as outras solicitações para index.php
-    RewriteRule ^ index.php [L]
+    RewriteRule ^ index.php [QSA,L]
 </IfModule>
 
 # Permitir acesso direto a arquivos de áudio e WAV
@@ -19,3 +19,12 @@
     Order Allow,Deny
     Allow from all
 </FilesMatch>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /voicehub/public/
+
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.php [QSA,L]
+</IfModule>
