@@ -1,10 +1,18 @@
 <?php
+
+/**
+ * Arquivo principal de roteamento da aplicação VoiceHub
+ * 
+ * Este arquivo é responsável por definir as rotas da aplicação,
+ * inicializar configurações globais e gerenciar o fluxo de requisições.
+ */
+
 // Definir o caminho base do projeto
 define('BASE_PATH', dirname(__DIR__));
 define('BASE_URL', '/voicehub/public');
 
 // Incluir o autoloader do Composer
-/*require_once BASE_PATH . '/vendor/autoload.php';*/
+require_once BASE_PATH . '/vendor/autoload.php';
 
 // Função de autoload para os controllers
 spl_autoload_register(function ($class_name) {
@@ -44,13 +52,21 @@ if (file_exists(BASE_PATH . '/src/helpers/functions.php')) {
 // Iniciar a sessão
 session_start();
 
-// Função para verificar se o usuário está logado
+/**
+ * Verifica se o usuário está logado
+ *
+ * @return bool
+ */
 function isLoggedIn()
 {
     return isset($_SESSION['user_id']);
 }
 
-// Função para verificar se o usuário é um administrador
+/**
+ * Verifica se o usuário é um administrador
+ *
+ * @return bool
+ */
 function isAdmin()
 {
     return isset($_SESSION['user_id']) && isset($_SESSION['is_admin']) && $_SESSION['is_admin'] === true;
@@ -119,6 +135,46 @@ switch ($request_uri) {
         // Página de redefinição de senha
         $controller = new AuthController();
         $controller->resetPassword();
+        break;
+
+    case '/dashboard/stats':
+        if (isLoggedIn()) {
+            $controller = new DashboardController();
+            $controller->getStats();
+        } else {
+            header("HTTP/1.0 403 Forbidden");
+            echo json_encode(['error' => 'Acesso não autorizado']);
+        }
+        break;
+
+    case '/companies':
+        if (isAdmin() && isset($_SESSION['user_permissions']['gerenciar_empresas']) && $_SESSION['user_permissions']['gerenciar_empresas'] == 1) {
+            $controller = new CompanyController();
+            $controller->index();
+        } else {
+            header("Location: " . BASE_URL . "/dashboard");
+            exit();
+        }
+        break;
+
+    case '/companies/create':
+        if (isAdmin() && isset($_SESSION['user_permissions']['gerenciar_empresas']) && $_SESSION['user_permissions']['gerenciar_empresas'] == 1) {
+            $controller = new CompanyController();
+            $controller->create();
+        } else {
+            header("Location: " . BASE_URL . "/dashboard");
+            exit();
+        }
+        break;
+
+    case '/companies/store':
+        if (isAdmin() && isset($_SESSION['user_permissions']['gerenciar_empresas']) && $_SESSION['user_permissions']['gerenciar_empresas'] == 1) {
+            $controller = new CompanyController();
+            $controller->store();
+        } else {
+            header("Location: " . BASE_URL . "/dashboard");
+            exit();
+        }
         break;
 
     case '/new-password':

@@ -123,29 +123,46 @@ body {
 .admin-section {
     background-color: var(--primary-white);
     border-radius: 15px;
-    padding: 20px;
+    padding: 30px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-top: 30px;
+}
+
+.admin-section-title {
+    font-size: 1.8em;
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: bold;
 }
 
 /* Grid para os cards de ações do administrador */
 .admin-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 15px;
-    margin-bottom: 25px;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
 }
 
 .admin-card {
     background-color: var(--light-gray);
     border-radius: 12px;
-    padding: 15px;
+    padding: 20px;
     text-align: center;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
 }
 
 .admin-card:hover {
-    transform: translateY(-3px);
+    transform: translateY(-5px);
     box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.admin-card-header {
+    margin-bottom: 15px;
 }
 
 .admin-icon {
@@ -155,26 +172,30 @@ body {
 }
 
 .admin-card h4 {
-    margin: 0 0 8px;
+    margin: 0;
     color: var(--primary-black);
-    font-size: 1em;
+    font-size: 1.2em;
+    font-weight: bold;
 }
 
 .admin-card p {
-    margin: 0 0 12px;
+    margin: 0 0 15px;
     color: var(--dark-gray);
     font-size: 0.9em;
+    flex-grow: 1;
 }
 
 .admin-btn {
     display: inline-block;
-    padding: 8px 16px;
+    padding: 10px 20px;
     background-color: var(--primary-blue);
     color: var(--primary-white);
     text-decoration: none;
     border-radius: 25px;
     transition: all 0.3s ease;
     font-size: 0.9em;
+    font-weight: bold;
+    text-transform: uppercase;
 }
 
 .admin-btn:hover {
@@ -183,22 +204,33 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.admin-btn.disabled {
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+    cursor: not-allowed;
+}
+
+.admin-btn.disabled:hover {
+    background-color: var(--light-gray);
+    transform: none;
+    box-shadow: none;
+}
+
 /* Estilos da seção de estatísticas do administrador */
 .admin-stats {
-    display: flex;
-    justify-content: space-between;
-    gap: 15px;
-    margin-top: 20px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
 }
 
 .admin-stats .stat-card {
-    flex: 1;
-    min-width: 0;
     background-color: var(--primary-white);
     border-radius: 12px;
-    padding: 15px;
+    padding: 20px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
+    text-align: center;
 }
 
 .admin-stats .stat-card:hover {
@@ -207,19 +239,19 @@ body {
 }
 
 .admin-stats .stat-icon {
-    font-size: 2em;
+    font-size: 2.5em;
     color: var(--primary-blue);
     margin-bottom: 10px;
 }
 
 .admin-stats .stat-details h4 {
     margin: 0 0 5px;
-    font-size: 0.9em;
+    font-size: 1em;
     color: var(--dark-gray);
 }
 
 .admin-stats .stat-number {
-    font-size: 1.8em;
+    font-size: 2em;
     font-weight: bold;
     color: var(--primary-red);
     margin: 0;
@@ -233,6 +265,35 @@ body {
     text-align: center;
     padding: 20px 0;
     margin-top: 30px;
+}
+
+/* Estilos para o modal de permissão negada */
+#permissionDeniedModal .modal-content {
+    border: none;
+    border-radius: 15px;
+}
+
+#permissionDeniedModal .modal-header {
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+#permissionDeniedModal .modal-body {
+    padding: 2rem;
+}
+
+#permissionDeniedModal .fa-exclamation-triangle {
+    color: #ffc107;
+}
+
+#permissionDeniedModal .btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
+
+#permissionDeniedModal .btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #0056b3;
 }
 
 /* Media queries para responsividade */
