@@ -1,0 +1,176 @@
+/* Importar a fonte Ubuntu Mono do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap');
+
+:root {
+    --primary-red: #FF0000;
+    --primary-blue: #0000FF;
+    --primary-white: #FFFFFF;
+    --primary-black: #000000;
+    --light-gray: #F5F5F5;
+    --dark-gray: #333333;
+    --background-color: rgba(245, 245, 245, 0.9);
+}
+
+/* Estilos gerais */
+body {
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: var(--background-color);
+    color: var(--primary-black);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* Estilo para o canvas de fundo */
+#backgroundCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+}
+
+/* Container principal do dashboard */
+.admin-dashboard {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    position: relative;
+    z-index: 1;
+}
+
+/* Estilo do título principal */
+.dashboard-title {
+    font-size: 2.5em;
+    color: var(--primary-blue);
+    text-align: center;
+    margin-bottom: 40px;
+    position: relative;
+}
+
+/* Linha decorativa abaixo do título */
+.dashboard-title::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    width: 60px;
+    height: 3px;
+    background: var(--primary-red);
+    transform: translateX(-50%);
+    transition: width 0.3s ease;
+}
+
+/* Efeito hover na linha decorativa */
+.dashboard-title:hover::after {
+    width: 100px;
+}
+
+/* Container dos cards */
+.admin-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 20px;
+}
+
+/* Estilo individual dos cards */
+.admin-card {
+    flex: 1 1 calc(33.333% - 20px);
+    max-width: calc(33.333% - 20px);
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+/* Efeito hover nos cards */
+.admin-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+    background-color: rgba(255, 255, 255, 0.95);
+}
+
+/* Ícone do card */
+.card-icon {
+    font-size: 3em;
+    color: var(--primary-blue);
+    margin-bottom: 20px;
+}
+
+/* Título do card */
+.admin-card h3 {
+    font-size: 1.5em;
+    color: var(--primary-black);
+    margin-bottom: 15px;
+}
+
+/* Número estatístico */
+.stat-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: var(--primary-red);
+    margin: 10px 0 5px;
+}
+
+/* Rótulo da estatística */
+.stat-label {
+    font-size: 1.2em;
+    color: var(--primary-blue);
+    margin-bottom: 15px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Descrição do card */
+.card-description {
+    font-size: 0.9em;
+    color: var(--dark-gray);
+    margin-bottom: 20px;
+    flex-grow: 1;
+}
+
+/* Botão de ação */
+.btn-action {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: var(--primary-blue);
+    color: var(--primary-white);
+    text-decoration: none;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+    font-size: 1em;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Efeito hover no botão */
+.btn-action:hover {
+    background-color: var(--primary-red);
+    transform: translateY(-2px);
+}
+
+/* Responsividade */
+@media (max-width: 1024px) {
+    .admin-card {
+        flex: 1 1 calc(50% - 20px);
+        max-width: calc(50% - 20px);
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-card {
+        flex: 1 1 100%;
+        max-width: 100%;
+
+    }
+}

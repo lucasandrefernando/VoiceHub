@@ -1,4 +1,5 @@
-/* Estilos para a página de gerenciamento de empresas */
+/* Importar a fonte Ubuntu Mono do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap');
 
 .companies-container {
     max-width: 1200px;

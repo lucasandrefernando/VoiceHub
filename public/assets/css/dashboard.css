@@ -1,3 +1,6 @@
+/* Importar a fonte Ubuntu Mono do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap');
+
 /* Estilos gerais para o corpo e estrutura da página */
 html,
 body {
@@ -10,10 +13,24 @@ body {
     display: flex;
     flex-direction: column;
     font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
 }
 
 .page-wrapper {
     flex: 1 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+/* Estilo para o canvas de fundo */
+#backgroundCanvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    opacity: 0.15;
 }
 
 /* Variáveis de cores para fácil customização */
@@ -32,7 +49,6 @@ body {
     margin: 0 auto;
     padding: 20px;
     animation: fadeIn 0.5s ease-in-out;
-    /* Animação suave ao carregar */
 }
 
 /* Estilos do cabeçalho do dashboard */
@@ -123,145 +139,6 @@ body {
     margin: 5px 0;
 }
 
-/* Estilos para a seção de administrador */
-.admin-section {
-    background-color: var(--primary-white);
-    border-radius: 15px;
-    padding: 30px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    margin-top: 30px;
-}
-
-.admin-section-title {
-    font-size: 1.8em;
-    color: var(--primary-blue);
-    margin-bottom: 20px;
-    text-align: center;
-    font-weight: bold;
-}
-
-/* Grid para os cards de ações do administrador */
-.admin-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.admin-card {
-    background-color: var(--light-gray);
-    border-radius: 12px;
-    padding: 20px;
-    text-align: center;
-    transition: all 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    height: 100%;
-}
-
-.admin-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
-}
-
-.admin-card-header {
-    margin-bottom: 15px;
-}
-
-.admin-icon {
-    font-size: 2.5em;
-    color: var(--primary-blue);
-    margin-bottom: 10px;
-}
-
-.admin-card h4 {
-    margin: 0;
-    color: var(--primary-black);
-    font-size: 1.2em;
-    font-weight: bold;
-}
-
-.admin-card p {
-    margin: 0 0 15px;
-    color: var(--dark-gray);
-    font-size: 0.9em;
-    flex-grow: 1;
-}
-
-/* Estilos para os botões de ação do administrador */
-.admin-btn {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: var(--primary-blue);
-    color: var(--primary-white);
-    text-decoration: none;
-    border-radius: 25px;
-    transition: all 0.3s ease;
-    font-size: 0.9em;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-
-.admin-btn:hover {
-    background-color: var(--primary-red);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.admin-btn.disabled {
-    background-color: var(--light-gray);
-    color: var(--dark-gray);
-    cursor: not-allowed;
-}
-
-.admin-btn.disabled:hover {
-    background-color: var(--light-gray);
-    transform: none;
-    box-shadow: none;
-}
-
-/* Estilos para as estatísticas do administrador */
-.admin-stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    margin-top: 30px;
-}
-
-.admin-stats .stat-card {
-    background-color: var(--primary-white);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-    text-align: center;
-}
-
-.admin-stats .stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-}
-
-.admin-stats .stat-icon {
-    font-size: 2.5em;
-    color: var(--primary-blue);
-    margin-bottom: 10px;
-}
-
-.admin-stats .stat-details h4 {
-    margin: 0 0 5px;
-    font-size: 1em;
-    color: var(--dark-gray);
-}
-
-.admin-stats .stat-number {
-    font-size: 2em;
-    font-weight: bold;
-    color: var(--primary-red);
-    margin: 0;
-}
-
 /* Estilos para o footer */
 .footer {
     flex-shrink: 0;
@@ -272,75 +149,21 @@ body {
     margin-top: 30px;
 }
 
-/* Estilos para o modal de permissão negada */
-#permissionDeniedModal .modal-content {
-    border: none;
-    border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+/* Estilos adicionais para melhorar a acessibilidade */
+.stat-card:focus {
+    outline: 2px solid var(--primary-blue);
+    outline-offset: 2px;
 }
 
-#permissionDeniedModal .modal-header {
-    background-color: #dc3545;
-    color: white;
-    border-top-left-radius: 15px;
-    border-top-right-radius: 15px;
-    padding: 1.5rem;
-}
+/* Animações suaves para melhorar a experiência do usuário */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
 
-#permissionDeniedModal .modal-title {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-#permissionDeniedModal .modal-body {
-    padding: 2rem;
-    text-align: center;
-}
-
-#permissionDeniedModal .fa-exclamation-triangle {
-    color: #ffc107;
-    font-size: 4rem;
-    margin-bottom: 1rem;
-}
-
-#permissionDeniedModal #permissionDeniedMessage {
-    font-size: 1.1rem;
-    color: #333;
-}
-
-#permissionDeniedModal .modal-footer {
-    border-top: none;
-    justify-content: center;
-    padding: 1.5rem;
-}
-
-#permissionDeniedModal .btn-secondary {
-    background-color: #6c757d;
-    border: none;
-    padding: 0.75rem 2rem;
-    font-size: 1rem;
-    font-weight: bold;
-    transition: all 0.3s ease;
-}
-
-#permissionDeniedModal .btn-secondary:hover {
-    background-color: #5a6268;
-    transform: translateY(-2px);
-}
-
-/* Estilo para o backdrop do modal */
-.modal-backdrop {
-    background-color: rgba(0, 0, 0, 0.5);
-}
-
-/* Animação para o modal */
-.modal.fade .modal-dialog {
-    transition: transform 0.3s ease-out;
-    transform: scale(0.8);
-}
-
-.modal.show .modal-dialog {
-    transform: scale(1);
+    to {
+        opacity: 1;
+    }
 }
 
 /* Media queries para responsividade */
@@ -359,34 +182,7 @@ body {
         text-align: center;
     }
 
-    .stats-container,
-    .admin-grid {
+    .stats-container {
         grid-template-columns: 1fr;
-    }
-
-    .admin-stats {
-        flex-direction: column;
-    }
-
-    .admin-stats .stat-card {
-        width: 100%;
-    }
-}
-
-/* Estilos adicionais para melhorar a acessibilidade */
-.admin-btn:focus,
-.stat-card:focus {
-    outline: 2px solid var(--primary-blue);
-    outline-offset: 2px;
-}
-
-/* Animações suaves para melhorar a experiência do usuário */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-    }
-
-    to {
-        opacity: 1;
     }
 }

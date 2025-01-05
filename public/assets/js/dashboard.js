@@ -1,7 +1,7 @@
 /**
  * dashboard.js
  * Este arquivo contém todas as funcionalidades JavaScript para o dashboard,
- * incluindo atualizações de estatísticas, interações do usuário e gerenciamento de modais.
+ * incluindo atualizações de estatísticas, interações do usuário e efeitos visuais de fundo.
  */
 
 document.addEventListener('DOMContentLoaded', function () {
@@ -13,16 +13,181 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Elementos do DOM que serão utilizados
     const statCards = document.querySelectorAll('.stat-card');
-    const adminButtons = document.querySelectorAll('.admin-btn');
-    const adminCards = document.querySelectorAll('.admin-card');
-    const permissionDeniedModalElement = document.getElementById('permissionDeniedModal');
-    const permissionDeniedMessage = document.getElementById('permissionDeniedMessage');
+    const canvas = document.getElementById('backgroundCanvas');
+    const ctx = canvas.getContext('2d');
 
-    // Inicialização do modal de permissão negada
-    const permissionDeniedModal = new bootstrap.Modal(permissionDeniedModalElement, {
-        backdrop: 'static',
-        keyboard: false
-    });
+    // Configurações do efeito de fundo
+    const gears = [];
+    const equations = [];
+    const graphs = [];
+
+    // Paleta de cores mais vibrante, mas ainda sutil
+    const colors = [
+        'rgba(41, 128, 185, 0.6)',  // Azul
+        'rgba(192, 57, 43, 0.6)',   // Vermelho
+        'rgba(39, 174, 96, 0.6)',   // Verde
+        'rgba(243, 156, 18, 0.6)',  // Amarelo
+        'rgba(142, 68, 173, 0.6)'   // Roxo
+    ];
+
+    /**
+     * Função para redimensionar o canvas
+     */
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        initializeVisualElements();
+    }
+
+    /**
+     * Classe Gear para criar engrenagens
+     */
+    class Gear {
+        constructor(x, y, radius, teeth, color) {
+            this.x = x;
+            this.y = y;
+            this.radius = radius;
+            this.teeth = teeth;
+            this.color = color;
+            this.rotation = 0;
+            this.speed = Math.random() * 0.02 + 0.01;
+        }
+
+        draw() {
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotation);
+            ctx.beginPath();
+            for (let i = 0; i < this.teeth; i++) {
+                const angle = (i / this.teeth) * Math.PI * 2;
+                const innerRadius = this.radius * 0.8;
+                const outerRadius = this.radius;
+                ctx.lineTo(Math.cos(angle) * innerRadius, Math.sin(angle) * innerRadius);
+                ctx.lineTo(Math.cos(angle + 0.1) * outerRadius, Math.sin(angle + 0.1) * outerRadius);
+            }
+            ctx.closePath();
+            ctx.fillStyle = this.color;
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.stroke();
+            ctx.restore();
+            this.rotation += this.speed;
+        }
+    }
+
+    /**
+     * Classe Equation para criar cálculos matemáticos
+     */
+    class Equation {
+        constructor(x, y) {
+            this.x = x;
+            this.y = y;
+            this.equation = this.generateEquation();
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+            this.fontSize = Math.random() * 6 + 14; // Tamanho de fonte entre 14 e 20
+        }
+
+        generateEquation() {
+            const operators = ['+', '-', '*', '/'];
+            const a = Math.floor(Math.random() * 10);
+            const b = Math.floor(Math.random() * 10);
+            const operator = operators[Math.floor(Math.random() * operators.length)];
+            return `${a} ${operator} ${b} = ?`;
+        }
+
+        draw() {
+            ctx.font = `${this.fontSize}px Arial`;
+            ctx.fillStyle = this.color;
+            ctx.fillText(this.equation, this.x, this.y);
+        }
+    }
+
+    /**
+     * Classe Graph para criar gráficos oscilantes
+     */
+    class Graph {
+        constructor(x, y, width, height) {
+            this.x = x;
+            this.y = y;
+            this.width = width;
+            this.height = height;
+            this.points = [];
+            this.maxPoints = 50;
+            this.color = colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        update() {
+            if (this.points.length >= this.maxPoints) {
+                this.points.shift();
+            }
+            this.points.push(Math.sin(Date.now() * 0.01) * this.height / 2 + this.height / 2);
+        }
+
+        draw() {
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.y + this.height / 2);
+            for (let i = 0; i < this.points.length; i++) {
+                ctx.lineTo(this.x + (i / this.maxPoints) * this.width, this.y + this.points[i]);
+            }
+            ctx.strokeStyle = this.color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+    }
+
+    /**
+     * Inicializa os elementos visuais
+     */
+    function initializeVisualElements() {
+        gears.length = 0;
+        equations.length = 0;
+        graphs.length = 0;
+
+        // Criar engrenagens
+        for (let i = 0; i < 7; i++) {
+            gears.push(new Gear(
+                Math.random() * canvas.width,
+                Math.random() * canvas.height,
+                Math.random() * 30 + 20,
+                Math.floor(Math.random() * 10) + 5,
+                colors[Math.floor(Math.random() * colors.length)]
+            ));
+        }
+
+        // Criar equações
+        for (let i = 0; i < 15; i++) {
+            equations.push(new Equation(
+                Math.random() * canvas.width,
+                Math.random() * canvas.height
+            ));
+        }
+
+        // Criar gráficos
+        for (let i = 0; i < 3; i++) {
+            graphs.push(new Graph(
+                Math.random() * (canvas.width - 300),
+                Math.random() * (canvas.height - 100),
+                300,
+                100
+            ));
+        }
+    }
+
+    /**
+     * Função para desenhar o fundo dinâmico
+     */
+    function drawBackground() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        gears.forEach(gear => gear.draw());
+        equations.forEach(eq => eq.draw());
+        graphs.forEach(graph => {
+            graph.update();
+            graph.draw();
+        });
+
+        requestAnimationFrame(drawBackground);
+    }
 
     /**
      * Anima a mudança de valor de um elemento
@@ -80,79 +245,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    /**
-     * Configura os eventos para os botões de administração
-     */
-    function setupAdminButtons() {
-        adminButtons.forEach(button => {
-            button.addEventListener('click', function (e) {
-                if (this.classList.contains('disabled')) {
-                    e.preventDefault();
-                    const feature = this.closest('.admin-card').querySelector('h4').textContent;
-                    showPermissionDeniedModal(feature);
-                }
-            });
-        });
-    }
+    // Inicialização
+    resizeCanvas();
+    initializeVisualElements();
+    drawBackground();
 
-    /**
-     * Adiciona efeitos de hover aos cards de administração
-     */
-    function setupAdminCards() {
-        adminCards.forEach(card => {
-            card.addEventListener('mouseenter', function () {
-                this.style.transform = 'translateY(-10px)';
-            });
-            card.addEventListener('mouseleave', function () {
-                this.style.transform = 'translateY(0)';
-            });
-        });
-    }
-
-    /**
-     * Exibe o modal de permissão negada
-     * @param {string} feature - O nome da funcionalidade que foi negada
-     */
-    function showPermissionDeniedModal(feature) {
-        permissionDeniedMessage.textContent = `Você não tem permissão para acessar a área de ${feature}. Entre em contato com o administrador do sistema.`;
-        permissionDeniedModal.show();
-    }
-
-    // Configuração para fechar o modal corretamente
-    permissionDeniedModalElement.addEventListener('hidden.bs.modal', function () {
-        document.body.classList.remove('modal-open');
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-            backdrop.remove();
-        }
-    });
-
-    // Configuração do botão para fechar o modal
-    const closeModalBtn = permissionDeniedModalElement.querySelector('.btn-secondary');
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', function () {
-            permissionDeniedModal.hide();
-        });
-    }
-
-    // Inicialização das funcionalidades
-    setupAdminButtons();
-    setupAdminCards();
+    // Event Listeners
+    window.addEventListener('resize', resizeCanvas);
 
     // Busca as estatísticas iniciais e configura a atualização periódica
     fetchUpdatedStats();
     setInterval(fetchUpdatedStats, 30000); // Atualiza a cada 30 segundos
 });
-
-/**
- * Função global para mostrar o modal de permissão negada
- * Esta função é exposta globalmente para ser usada em atributos onclick no HTML
- * @param {string} feature - O nome da funcionalidade que foi negada
- */
-window.showPermissionDeniedModal = function (feature) {
-    const modalElement = document.getElementById('permissionDeniedModal');
-    const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-    document.getElementById('permissionDeniedMessage').textContent =
-        `Você não tem permissão para acessar a área de ${feature}. Entre em contato com o administrador do sistema.`;
-    modal.show();
-};

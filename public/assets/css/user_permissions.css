@@ -1,3 +1,6 @@
+/* Importar a fonte Ubuntu Mono do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap');
+
 /* Variáveis de cores principais */
 :root {
     --primary-white: #ffffff;

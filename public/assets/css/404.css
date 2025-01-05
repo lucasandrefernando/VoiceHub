@@ -1,0 +1,113 @@
+/* Importar a fonte Ubuntu Mono do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap');
+
+/* Estilos gerais */
+html,
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: 'Ubuntu Mono', monospace;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    background-color: #f0f0f0;
+    /* Fundo claro e neutro */
+}
+
+/* Container principal */
+.error-container {
+    flex: 1 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    background-image:
+        linear-gradient(to right, #e0e0e0 1px, transparent 1px),
+        linear-gradient(to bottom, #e0e0e0 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+/* Conteúdo do erro */
+.error-content {
+    text-align: center;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08);
+    background-color: #ffffff;
+    max-width: 500px;
+    width: 100%;
+}
+
+/* Código de erro */
+.error-code {
+    font-size: 120px;
+    color: #ff0000;
+    margin: 0;
+    line-height: 1;
+}
+
+/* Estilo do terminal */
+.terminal {
+    background-color: #000000;
+    border-radius: 5px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left;
+    border: 1px solid #ccc;
+}
+
+/* Mensagem de erro */
+.error-message {
+    font-size: 16px;
+    color: #00ff00;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Botão de voltar */
+.btn-back {
+    background-color: #0000ff;
+    color: #ffffff;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    border-radius: 5px;
+    font-family: 'Ubuntu Mono', monospace;
+}
+
+.btn-back:hover {
+    background-color: #0000cc;
+    transform: translateY(-2px);
+}
+
+/* Estilos do footer */
+footer {
+    flex-shrink: 0;
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Estilos responsivos */
+@media (max-width: 480px) {
+    .error-code {
+        font-size: 80px;
+    }
+
+    .error-message {
+        font-size: 14px;
+    }
+
+    .btn-back {
+        font-size: 14px;
+        padding: 8px 16px;
+    }
+}

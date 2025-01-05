@@ -17,6 +17,9 @@ if (isset($_GET['debug'])) {
 }
 ?>
 
+<!-- Canvas para o efeito de fundo -->
+<canvas id="backgroundCanvas"></canvas>
+
 <!-- Corpo principal do dashboard -->
 <div class="page-wrapper">
     <div class="dashboard-container">
@@ -25,7 +28,7 @@ if (isset($_GET['debug'])) {
             <div class="user-info">
                 <div class="user-avatar">
                     <!-- Exibe a foto do usuário ou uma imagem padrão -->
-                    <img src="<?php echo !empty($photoPath) ? htmlspecialchars($photoPath) : BASE_URL . '/assets/images/profile.png'; ?>" alt="User Photo" class="user-photo">
+                    <img src="<?php echo htmlspecialchars($photoPath); ?>" alt="User Photo" class="user-photo" onerror="this.src='<?php echo BASE_URL; ?>/assets/images/profile.png'">
                 </div>
                 <div class="user-details">
                     <h2><?php echo htmlspecialchars($user['name']); ?></h2>
@@ -65,102 +68,6 @@ if (isset($_GET['debug'])) {
                         <p class="stat-number"><?php echo $activeUsers; ?></p>
                     </div>
                 </div>
-            </div>
-
-            <!-- Seção de Administrador (visível apenas para administradores) -->
-            <?php if ($is_admin): ?>
-                <div class="admin-section">
-                    <h3 class="admin-section-title">Área do Administrador</h3>
-                    <div class="admin-grid">
-                        <!-- Card: Controle de Permissões -->
-                        <div class="admin-card">
-                            <div class="admin-card-header">
-                                <div class="admin-icon"><i class="fas fa-user-cog"></i></div>
-                                <h4>Controle de Permissões</h4>
-                            </div>
-                            <p>Gerencie as permissões dos usuários</p>
-                            <?php if (isset($_SESSION['user_permissions']['administrador_sistema']) && $_SESSION['user_permissions']['administrador_sistema']): ?>
-                                <a href="<?php echo BASE_URL; ?>/admin/user-permissions" class="admin-btn">Acessar</a>
-                            <?php else: ?>
-                                <button class="admin-btn disabled" onclick="showPermissionDeniedModal('Controle de Permissões')">Acessar</button>
-                            <?php endif; ?>
-                        </div>
-                        <!-- Card: Gerenciar Empresas -->
-                        <div class="admin-card">
-                            <div class="admin-card-header">
-                                <div class="admin-icon"><i class="fas fa-building"></i></div>
-                                <h4>Gerenciar Empresas</h4>
-                            </div>
-                            <p>Administre as empresas cadastradas</p>
-                            <?php if (isset($_SESSION['user_permissions']['gerenciar_empresas']) && $_SESSION['user_permissions']['gerenciar_empresas'] == 1): ?>
-                                <a href="<?php echo BASE_URL; ?>/companies" class="admin-btn">Acessar</a>
-                            <?php else: ?>
-                                <button class="admin-btn disabled" onclick="showPermissionDeniedModal('Gerenciar Empresas')">Acessar</button>
-                            <?php endif; ?>
-                        </div>
-                        <!-- Card: Gerenciar Licenças -->
-                        <div class="admin-card">
-                            <div class="admin-card-header">
-                                <div class="admin-icon"><i class="fas fa-key"></i></div>
-                                <h4>Gerenciar Licenças</h4>
-                            </div>
-                            <p>Controle as licenças ativas</p>
-                            <?php if (isset($userPermissions['gerenciar_licencas']) && $userPermissions['gerenciar_licencas']): ?>
-                                <a href="<?php echo BASE_URL; ?>/licenses" class="admin-btn">Acessar</a>
-                            <?php else: ?>
-                                <button class="admin-btn disabled" onclick="showPermissionDeniedModal('Gerenciar Licenças')">Acessar</button>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    <!-- Estatísticas do administrador -->
-                    <div class="admin-stats">
-                        <!-- Total de Empresas -->
-                        <div class="stat-card" data-stat="totalCompanies">
-                            <div class="stat-icon"><i class="fas fa-building"></i></div>
-                            <div class="stat-details">
-                                <h4>Total de Empresas</h4>
-                                <p class="stat-number"><?php echo $totalCompanies; ?></p>
-                            </div>
-                        </div>
-                        <!-- Total de Usuários -->
-                        <div class="stat-card" data-stat="totalUsers">
-                            <div class="stat-icon"><i class="fas fa-users"></i></div>
-                            <div class="stat-details">
-                                <h4>Total de Usuários</h4>
-                                <p class="stat-number"><?php echo $totalUsers; ?></p>
-                            </div>
-                        </div>
-                        <!-- Licenças Ativas -->
-                        <div class="stat-card" data-stat="activeLicenses">
-                            <div class="stat-icon"><i class="fas fa-key"></i></div>
-                            <div class="stat-details">
-                                <h4>Licenças Ativas</h4>
-                                <p class="stat-number"><?php echo $activeLicenses; ?></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            <?php endif; ?>
-        </div>
-    </div>
-</div>
-
-<!-- Modal de Permissão Negada -->
-<div class="modal fade" id="permissionDeniedModal" tabindex="-1" aria-labelledby="permissionDeniedModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="permissionDeniedModalLabel">Acesso Negado</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center mb-4">
-                    <i class="fas fa-exclamation-triangle fa-4x text-warning"></i>
-                </div>
-                <p class="text-center" id="permissionDeniedMessage"></p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
             </div>
         </div>
     </div>

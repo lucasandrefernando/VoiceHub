@@ -11,26 +11,25 @@ class AdminController
         $this->db = $db;
     }
 
-    public function index()
+    public function dashboard()
     {
-        if (!isAdmin()) {
+        if (!$this->isAdmin()) {
             header("Location: " . BASE_URL . "/login");
             exit();
         }
 
-        $companies = $this->db->query("
-            SELECT c.id, c.name, COALESCE(l.total_licenses, 0) as total_licenses, COALESCE(l.used_licenses, 0) as used_licenses
-            FROM companies c
-            LEFT JOIN licenses l ON c.id = l.company_id
-            ORDER BY c.name
-        ")->fetchAll(PDO::FETCH_ASSOC);
+        $totalCompanies = $this->getTotalCompanies();
+        $totalUsers = $this->getTotalUsers();
+        $activeLicenses = $this->getActiveLicenses();
 
-        require_once BASE_PATH . '/src/views/admin/index.php';
+        $companies = $this->getCompaniesWithLicenses();
+
+        require_once BASE_PATH . '/src/views/admin/admin_dashboard.php';
     }
 
     public function addCompany()
     {
-        if (!isAdmin() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (!$this->isAdmin() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location: " . BASE_URL . "/admin");
             exit();
         }
@@ -67,7 +66,7 @@ class AdminController
 
     public function updateLicenses()
     {
-        if (!isAdmin() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
+        if (!$this->isAdmin() || $_SERVER['REQUEST_METHOD'] !== 'POST') {
             header("Location: " . BASE_URL . "/admin");
             exit();
         }
@@ -98,11 +97,39 @@ class AdminController
         exit();
     }
 
-    // Adicionamos esta função para substituir manageLicenses()
-    public function manageLicenses()
+    private function isAdmin()
     {
-        // Esta função agora apenas redireciona para a página principal do admin
-        header("Location: " . BASE_URL . "/admin");
-        exit();
+        return isset($_SESSION['user_permissions']['administrador_sistema']) && $_SESSION['user_permissions']['administrador_sistema'];
+    }
+
+    private function getTotalCompanies()
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM companies");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    private function getTotalUsers()
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    private function getActiveLicenses()
+    {
+        $stmt = $this->db->prepare("SELECT SUM(used_licenses) FROM licenses");
+        $stmt->execute();
+        return $stmt->fetchColumn();
+    }
+
+    private function getCompaniesWithLicenses()
+    {
+        return $this->db->query("
+            SELECT c.id, c.name, COALESCE(l.total_licenses, 0) as total_licenses, COALESCE(l.used_licenses, 0) as used_licenses
+            FROM companies c
+            LEFT JOIN licenses l ON c.id = l.company_id
+            ORDER BY c.name
+        ")->fetchAll(PDO::FETCH_ASSOC);
     }
 }

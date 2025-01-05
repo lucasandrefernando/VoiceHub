@@ -44,10 +44,6 @@ foreach ($required_env_vars as $var) {
 // Incluir configurações
 require_once BASE_PATH . '/src/config/database.php';
 
-// Incluir funções auxiliares
-if (file_exists(BASE_PATH . '/src/helpers/functions.php')) {
-    require_once BASE_PATH . '/src/helpers/functions.php';
-}
 
 require_once BASE_PATH . '/src/controllers/UserPermissionsController.php';
 
@@ -111,32 +107,56 @@ switch ($request_uri) {
 
     case '/login':
         // Página de login
-        $controller = new AuthController();
+        $controller = new LoginController();
         $controller->login();
         break;
 
     case '/register':
         // Página de registro
-        $controller = new AuthController();
+        $controller = new RegisterController();
         $controller->register();
         break;
 
     case '/check-first-access':
         // Verificar primeiro acesso
-        $controller = new AuthController();
+        $controller = new LoginController();
         $controller->checkFirstAccess();
         break;
 
     case '/forgot-password':
         // Página de recuperação de senha
-        $controller = new AuthController();
+        $controller = new PasswordResetController();
         $controller->forgotPassword();
         break;
 
     case '/reset-password':
         // Página de redefinição de senha
-        $controller = new AuthController();
+        $controller = new PasswordResetController();
         $controller->resetPassword();
+        break;
+
+    case '/new-password':
+        // Página para definir nova senha
+        $controller = new PasswordResetController();
+        $controller->newPassword();
+        break;
+
+    case '/verify-code':
+        // Verificação de código
+        $controller = new RegisterController();
+        $controller->verifyCode();
+        break;
+
+    case '/resend-verification-code':
+        // Reenvio de código de verificação
+        $controller = new RegisterController();
+        $controller->resendVerificationCode();
+        break;
+
+    case '/logout':
+        // Logout do usuário
+        $controller = new LoginController();
+        $controller->logout();
         break;
 
     case '/dashboard/stats':
@@ -170,34 +190,11 @@ switch ($request_uri) {
         $controller->delete($matches[1]);
         break;
 
-
-
-    case '/new-password':
-        // Página para definir nova senha
-        $controller = new AuthController();
-        $controller->newPassword();
-        break;
-
     case '/companies/search-cnpj':
         $controller = new CompanyController();
         $controller->searchByCNPJ();
         break;
 
-    case '/verify-code':
-        // Redirecionar para login (verificação de código)
-        header("Location: " . BASE_URL . "/login");
-        exit();
-
-    case '/resend-verification-code':
-        // Redirecionar para login (reenvio de código de verificação)
-        header("Location: " . BASE_URL . "/login");
-        exit();
-
-    case '/logout':
-        // Logout do usuário
-        $controller = new AuthController();
-        $controller->logout();
-        break;
 
     case '/dashboard':
         // Página do dashboard
@@ -212,10 +209,9 @@ switch ($request_uri) {
 
 
     case '/admin':
-        // Página de administração
         if (isAdmin()) {
             $controller = new AdminController();
-            $controller->index();
+            $controller->dashboard();
         } else {
             header("Location: " . BASE_URL . "/login");
             exit();
@@ -223,7 +219,6 @@ switch ($request_uri) {
         break;
 
     case '/admin/add-company':
-        // Adicionar nova empresa (admin)
         if (isAdmin()) {
             $controller = new AdminController();
             $controller->addCompany();
@@ -234,7 +229,6 @@ switch ($request_uri) {
         break;
 
     case '/admin/update-licenses':
-        // Atualizar licenças (admin)
         if (isAdmin()) {
             $controller = new AdminController();
             $controller->updateLicenses();
@@ -245,7 +239,7 @@ switch ($request_uri) {
         break;
 
     case '/admin/user-permissions':
-        if (isset($_SESSION['user_permissions']['administrador_sistema']) && $_SESSION['user_permissions']['administrador_sistema']) {
+        if (isAdmin()) {
             $controller = new UserPermissionsController();
             $controller->index();
         } else {
@@ -266,35 +260,10 @@ switch ($request_uri) {
 
     case '/resend-verification':
         // Reenviar código de verificação
-        $controller = new AuthController();
+        $controller = new RegisterController();
         $controller->resendVerificationCode();
         break;
 
-
-
-    case '/profile':
-        // Página de perfil do usuário
-        $controller = new ProfileController();
-        $controller->index();
-        break;
-
-    case '/profile/update':
-        // Atualizar perfil do usuário
-        $controller = new ProfileController();
-        $controller->update();
-        break;
-
-    case '/terms':
-        // Página de termos de uso
-        $controller = new AuthController();
-        $controller->terms();
-        break;
-
-    case '/privacy':
-        // Página de política de privacidade
-        $controller = new AuthController();
-        $controller->privacy();
-        break;
 
     case (preg_match('/^\/admin\/get-user-permissions\/(\d+)$/', $request_uri, $matches) ? true : false):
         if (isAdmin()) {
@@ -305,7 +274,6 @@ switch ($request_uri) {
             header("HTTP/1.0 403 Forbidden");
             echo json_encode(['error' => 'Acesso não autorizado']);
         }
-        exit();
         break;
 
     case '/admin/verify-code':
@@ -326,6 +294,32 @@ switch ($request_uri) {
             header("HTTP/1.0 403 Forbidden");
             exit();
         }
+        break;
+
+    case '/user/profile':
+        $controller = new UserProfileController();
+        $controller->index();
+        break;
+
+    case '/user/update-profile':
+        $controller = new UserProfileController();
+        $controller->updateProfile();
+        break;
+
+    case '/user/update-password':
+        $controller = new UserProfileController();
+        $controller->updatePassword();
+        break;
+
+    case '/user/update-profile-picture':
+        $controller = new UserProfileController();
+        $controller->updateProfilePicture();
+        break;
+        // No seu arquivo de rotas (index.php ou similar)
+
+    case '/user/remove-profile-picture':
+        $controller = new UserProfileController();
+        $controller->removeProfilePicture();
         break;
 
     default:

@@ -1,6 +1,6 @@
 <?php
 
-require_once BASE_PATH . '/src/controllers/AuthController.php';
+require_once BASE_PATH . '/src/controllers/LoginController.php';
 
 /**
  * DashboardController
@@ -12,18 +12,18 @@ class DashboardController
     /** @var PDO $db Conexão com o banco de dados */
     private $db;
 
-    /** @var AuthController $authController Instância do controlador de autenticação */
-    private $authController;
+    /** @var LoginController $loginController Instância do controlador de login */
+    private $loginController;
 
     /**
      * Construtor da classe
-     * Inicializa a conexão com o banco de dados e o controlador de autenticação
+     * Inicializa a conexão com o banco de dados e o controlador de login
      */
     public function __construct()
     {
         global $db;
         $this->db = $db;
-        $this->authController = new AuthController();
+        $this->loginController = new LoginController();
     }
 
     /**
@@ -36,8 +36,6 @@ class DashboardController
             header("Location: " . BASE_URL . "/login");
             exit();
         }
-
-
 
         $userId = $_SESSION['user_id'];
         $companyId = $_SESSION['company_id'];
@@ -62,25 +60,37 @@ class DashboardController
         // Buscar estatísticas
         $totalRecordings = $this->getTotalRecordings($companyId);
         $todayRecordings = $this->getTodayRecordings($companyId);
-        $activeUsers = $this->authController->getActiveUsersCount();
+        $activeUsers = $this->loginController->getActiveUsersCount();
 
-        // Buscar permissões do usuário
-        $userPermissions = $this->getUserPermissions($userId);
+        // Determinar o caminho da foto do usuário
+        $photoPath = $this->getUserPhotoPath($user);
 
-        // Verificar se o usuário é admin do sistema
-        $is_admin = isset($userPermissions['administrador_sistema']) && $userPermissions['administrador_sistema'] == 1;
-
-        if ($is_admin) {
-            // Buscar estatísticas de admin
-            $totalCompanies = $this->getTotalCompanies();
-            $totalUsers = $this->getTotalUsers();
-            $activeLicenses = $this->getActiveLicenses();
-        }
-
-        $photoPath = $user['photo'] ? BASE_URL . '/uploads/profile_pictures/' . $user['photo'] : null;
+        // Log para depuração
+        error_log("User Photo Path: " . $photoPath); 
 
         // Carregar a view do dashboard
         require_once BASE_PATH . '/src/views/dashboard.php';
+    }
+
+    /**
+     * Determina o caminho da foto do usuário
+     * @param array $user Informações do usuário
+     * @return string|null
+     */
+    private function getUserPhotoPath($user)
+    {
+        if (!empty($user['profile_picture'])) {
+            return BASE_URL . '/uploads/profile_pictures/' . $user['profile_picture'];
+        }
+
+        if (!empty($user['photo'])) {
+            $tempFileName = 'temp_' . uniqid() . '.jpg';
+            $tempFilePath = BASE_PATH . '/public/uploads/profile_pictures/' . $tempFileName;
+            file_put_contents($tempFilePath, $user['photo']);
+            return BASE_URL . '/uploads/profile_pictures/' . $tempFileName;
+        }
+
+        return BASE_URL . '/assets/images/profile.png';
     }
 
     /**
@@ -89,22 +99,12 @@ class DashboardController
     public function getStats()
     {
         $companyId = $_SESSION['company_id'];
-        $userId = $_SESSION['user_id'];
 
         $stats = [
             'totalRecordings' => $this->getTotalRecordings($companyId),
             'todayRecordings' => $this->getTodayRecordings($companyId),
-            'activeUsers' => $this->authController->getActiveUsersCount()
+            'activeUsers' => $this->loginController->getActiveUsersCount()
         ];
-
-        $userPermissions = $this->getUserPermissions($userId);
-        $is_admin = isset($userPermissions['administrador_sistema']) && $userPermissions['administrador_sistema'] == 1;
-
-        if ($is_admin) {
-            $stats['totalCompanies'] = $this->getTotalCompanies();
-            $stats['totalUsers'] = $this->getTotalUsers();
-            $stats['activeLicenses'] = $this->getActiveLicenses();
-        }
 
         header('Content-Type: application/json');
         echo json_encode($stats);
@@ -131,7 +131,7 @@ class DashboardController
      */
     private function getUserInfo($userId)
     {
-        $stmt = $this->db->prepare("SELECT name, email, photo FROM users WHERE id = ?");
+        $stmt = $this->db->prepare("SELECT name, email, photo, profile_picture FROM users WHERE id = ?");
         $stmt->execute([$userId]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
@@ -182,38 +182,5 @@ class DashboardController
         $stmt = $this->db->prepare("SELECT permission_key, value FROM user_permissions WHERE user_id = ?");
         $stmt->execute([$userId]);
         return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-    }
-
-    /**
-     * Retorna o total de empresas
-     * @return int
-     */
-    private function getTotalCompanies()
-    {
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM companies");
-        $stmt->execute();
-        return $stmt->fetchColumn();
-    }
-
-    /**
-     * Retorna o total de usuários
-     * @return int
-     */
-    private function getTotalUsers()
-    {
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM users");
-        $stmt->execute();
-        return $stmt->fetchColumn();
-    }
-
-    /**
-     * Retorna o total de licenças ativas
-     * @return int
-     */
-    private function getActiveLicenses()
-    {
-        $stmt = $this->db->prepare("SELECT SUM(used_licenses) FROM licenses");
-        $stmt->execute();
-        return $stmt->fetchColumn();
     }
 }
