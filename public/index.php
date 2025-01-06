@@ -322,10 +322,39 @@ switch ($request_uri) {
         $controller->removeProfilePicture();
         break;
 
+    case '/recordings':
+        if (isLoggedIn()) {
+            $controller = new RecordingsController();
+            $controller->index();
+        } else {
+            header("Location: " . BASE_URL . "/login");
+            exit();
+        }
+        break;
+
+    case (preg_match('/^\/recordings\/(\d+)$/', $request_uri, $matches) ? true : false):
+        if (isLoggedIn()) {
+            $controller = new RecordingsController();
+            echo json_encode($controller->getRecordingDetails($matches[1]));
+        } else {
+            header("HTTP/1.0 403 Forbidden");
+            echo json_encode(['error' => 'Acesso não autorizado']);
+        }
+        exit();
+
+    case '/recordings/analyze':
+        if (isLoggedIn()) {
+            $controller = new RecordingsController();
+            echo json_encode($controller->analyze());
+        } else {
+            header("HTTP/1.0 403 Forbidden");
+            echo json_encode(['error' => 'Acesso não autorizado']);
+        }
+        exit();
+
     default:
         // Página não encontrada
         header("HTTP/1.0 404 Not Found");
         require_once BASE_PATH . '/src/views/404.php';
         break;
 }
-  

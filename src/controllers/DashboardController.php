@@ -58,15 +58,15 @@ class DashboardController
         $companyName = $this->getCompanyName($companyId);
 
         // Buscar estatísticas
-        $totalRecordings = $this->getTotalRecordings($companyId);
-        $todayRecordings = $this->getTodayRecordings($companyId);
+        $totalRecordings = $this->getTotalRecordings();
+        $todayRecordings = $this->getTodayRecordings();
         $activeUsers = $this->loginController->getActiveUsersCount();
 
         // Determinar o caminho da foto do usuário
         $photoPath = $this->getUserPhotoPath($user);
 
         // Log para depuração
-        error_log("User Photo Path: " . $photoPath); 
+        error_log("User Photo Path: " . $photoPath);
 
         // Carregar a view do dashboard
         require_once BASE_PATH . '/src/views/dashboard.php';
@@ -98,11 +98,9 @@ class DashboardController
      */
     public function getStats()
     {
-        $companyId = $_SESSION['company_id'];
-
         $stats = [
-            'totalRecordings' => $this->getTotalRecordings($companyId),
-            'todayRecordings' => $this->getTodayRecordings($companyId),
+            'totalRecordings' => $this->getTotalRecordings(),
+            'todayRecordings' => $this->getTodayRecordings(),
             'activeUsers' => $this->loginController->getActiveUsersCount()
         ];
 
@@ -149,27 +147,35 @@ class DashboardController
     }
 
     /**
-     * Retorna o total de gravações para uma empresa
-     * @param int $companyId ID da empresa
+     * Retorna o total de gravações
      * @return int
      */
-    private function getTotalRecordings($companyId)
+    private function getTotalRecordings()
     {
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM recordings WHERE company_id = ?");
-        $stmt->execute([$companyId]);
-        return $stmt->fetchColumn();
+        try {
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM records");
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar total de gravações: " . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
-     * Retorna o total de gravações de hoje para uma empresa
-     * @param int $companyId ID da empresa
+     * Retorna o total de gravações de hoje
      * @return int
      */
-    private function getTodayRecordings($companyId)
+    private function getTodayRecordings()
     {
-        $stmt = $this->db->prepare("SELECT COUNT(*) FROM recordings WHERE company_id = ? AND DATE(created_at) = CURDATE()");
-        $stmt->execute([$companyId]);
-        return $stmt->fetchColumn();
+        try {
+            $stmt = $this->db->prepare("SELECT COUNT(*) FROM records WHERE DATE(created_at) = CURDATE()");
+            $stmt->execute();
+            return $stmt->fetchColumn();
+        } catch (PDOException $e) {
+            error_log("Erro ao buscar gravações de hoje: " . $e->getMessage());
+            return 0;
+        }
     }
 
     /**
