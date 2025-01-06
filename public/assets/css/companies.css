@@ -1,64 +1,505 @@
-/* Importar a fonte Ubuntu Mono do Google Fonts */
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu+Mono&display=swap');
+/* Importação da fonte Roboto do Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
 
-.companies-container {
-    max-width: 1200px;
+/* Definição das variáveis de cores e dimensões */
+:root {
+    --primary-color: #FF0000;
+    --secondary-color: #000000;
+    --background-color: #FFFFFF;
+    --text-color: #333333;
+    --card-background: rgba(255, 255, 255, 0.9);
+    --sidebar-width: 320px;
+    --transition-speed: 0.3s;
+    --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Estilos gerais do corpo da página */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* Container principal que envolve a sidebar e o conteúdo */
+.companies-wrapper {
+    display: flex;
+    height: 100vh;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 20px;
+    background-color: var(--card-background);
+    box-shadow: var(--box-shadow);
+    border-radius: 15px;
+    overflow: hidden;
 }
 
-.companies-container h1 {
-    margin-bottom: 20px;
-    color: #333;
+/* Estilos da sidebar */
+.sidebar {
+    width: var(--sidebar-width);
+    min-width: var(--sidebar-width);
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: var(--background-color);
+    padding: 1.5rem;
+    height: 100vh;
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    flex-direction: column;
 }
 
-#addCompanyBtn {
-    margin-bottom: 20px;
+/* Parte fixa da sidebar */
+.sidebar-fixed {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: inherit;
+    padding-bottom: 1rem;
+    padding: 10px;
 }
 
-#companiesTable {
+/* Título da sidebar */
+.sidebar h2 {
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    font-size: 1.4rem;
+    text-align: center;
+}
+
+/* Botão de adicionar nova empresa */
+.btn-add {
     width: 100%;
-    border-collapse: collapse;
+    padding: 0.8rem;
+    background-color: var(--background-color);
+    color: var(--primary-color);
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed);
 }
 
-#companiesTable th,
-#companiesTable td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
+.btn-add:hover {
+    background-color: var(--secondary-color);
+    color: var(--background-color);
 }
 
-#companiesTable th {
-    background-color: #f2f2f2;
-    font-weight: bold;
+/* Caixa de pesquisa na sidebar */
+.search-box {
+    position: relative;
+    margin-top: 1rem;
 }
 
-#companiesTable tr:hover {
-    background-color: #f5f5f5;
+.search-box input {
+    width: 100%;
+    padding: 0.8rem;
+    border: none;
+    border-radius: 5px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--background-color);
 }
 
-.action-buttons .btn {
-    margin-right: 5px;
+.search-box i {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
 }
 
-/* Estilos para os modais */
-.modal-header {
+/* Lista de empresas na sidebar */
+.company-list {
+    margin-top: 1.5rem;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+.company-item {
+    padding: 0.8rem;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    margin-bottom: 0.5rem;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.company-item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Estilos do conteúdo principal */
+.main-content {
+    flex-grow: 1;
+    padding: 2rem;
+    overflow-y: auto;
+    height: 95vh;
+}
+
+/* Card de empresa (detalhes e formulário) */
+.company-card {
+    background-color: var(--background-color);
+    border-radius: 10px;
+    padding: 2rem;
+    box-shadow: var(--box-shadow);
+    transition: all var(--transition-speed);
+    margin-bottom: 2rem;
+}
+
+/* Título do card de detalhes da empresa */
+#companyNameDisplay {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+}
+
+/* Grid de informações da empresa */
+.company-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+/* Item de informação da empresa */
+.info-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 1.5rem;
     background-color: #f8f9fa;
-    border-bottom: 1px solid #dee2e6;
+    border-radius: 8px;
+    transition: all var(--transition-speed);
+    overflow: hidden;
+    height: 100%;
+}
+
+.info-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.info-item i {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.info-item label {
+    font-weight: 500;
+    color: var(--secondary-color);
+    margin-bottom: 0.5rem;
+}
+
+.info-item span {
+    word-break: break-word;
+    overflow: auto;
+    max-height: 60px;
+}
+
+/* Botões de ação */
+.action-buttons {
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.btn-edit,
+.btn-delete,
+.btn-primary,
+.btn-secondary {
+    padding: 0.8rem 1.5rem;
+    border: none;
+    border-radius: 5px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-speed);
+}
+
+.btn-edit,
+.btn-primary {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+}
+
+.btn-delete {
+    background-color: var(--secondary-color);
+    color: var(--background-color);
+}
+
+.btn-secondary {
+    background-color: #ddd;
+    color: var(--text-color);
+}
+
+.btn-edit:hover,
+.btn-delete:hover,
+.btn-primary:hover,
+.btn-secondary:hover {
+    opacity: 0.9;
+    transform: translateY(-2px);
+}
+
+/* Estilos do formulário */
+.form-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    flex: 1;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    transition: border-color 0.3s;
+}
+
+.form-group input:focus {
+    border-color: var(--primary-color);
+    outline: none;
+}
+
+/* Grupo de input com botão (para CNPJ) */
+.input-group {
+    display: flex;
+}
+
+.input-group input {
+    flex: 1;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+.input-group button {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    border: none;
+    padding: 0 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.input-group button:hover {
+    background-color: var(--secondary-color);
+}
+
+/* Ações do formulário */
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+/* Estilos para modais */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.modal.show {
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: var(--background-color);
+    margin: 10% auto;
+    padding: 0;
+    width: 90%;
+    max-width: 500px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: scale(0.7);
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    overflow: hidden;
+}
+
+.modal.show .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: var(--background-color);
+    padding: 20px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--background-color);
+}
+
+.close {
+    color: var(--background-color);
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.close:hover {
+    transform: rotate(90deg);
+}
+
+.modal-body {
+    padding: 20px;
+    color: var(--text-color);
+    max-height: 60vh;
+    overflow-y: auto;
 }
 
 .modal-footer {
-    border-top: 1px solid #dee2e6;
+    background-color: var(--light-gray);
+    padding: 15px 20px;
+    text-align: right;
+    border-bottom-left-radius: 20px;
+    border-bottom-right-radius: 20px;
+}
+
+.modal-close-btn,
+.btn-secondary,
+.btn-danger {
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border: none;
+}
+
+.modal-close-btn {
+    background-color: var(--primary-color);
+    color: var(--background-color);
+}
+
+.btn-secondary {
+    background-color: #ddd;
+    color: var(--text-color);
+}
+
+.btn-danger {
+    background-color: #ff4d4d;
+    color: var(--background-color);
+}
+
+.modal-close-btn:hover,
+.btn-secondary:hover,
+.btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+/* Animações para modais */
+@keyframes shake {
+
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+
+    10%,
+    30%,
+    50%,
+    70%,
+    90% {
+        transform: translateX(-10px);
+    }
+
+    20%,
+    40%,
+    60%,
+    80% {
+        transform: translateX(10px);
+    }
+}
+
+.error-modal-content {
+    animation: shake 0.82s cubic-bezier(.36, .07, .19, .97) both;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.success-modal-content {
+    animation: pulse 0.5s ease-in-out 2;
 }
 
 /* Responsividade */
-@media (max-width: 768px) {
-    #companiesTable {
-        font-size: 14px;
+@media (max-width: 1200px) {
+    .companies-wrapper {
+        flex-direction: column;
     }
 
-    .action-buttons .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.875rem;
+    .sidebar {
+        width: 100%;
+        height: auto;
+        min-height: 200px;
+    }
+
+    .main-content {
+        height: auto;
+    }
+
+    .form-row {
+        flex-direction: column;
+    }
+}
+
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        margin: 5% auto;
+    }
+
+    .modal-header h1 {
+        font-size: 1.2rem;
+    }
+
+    .modal-body {
+        padding: 15px;
+        max-height: 60vh;
     }
 }

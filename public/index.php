@@ -328,3 +328,4 @@ switch ($request_uri) {
         require_once BASE_PATH . '/src/views/404.php';
         break;
 }
+  

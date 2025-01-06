@@ -256,4 +256,4 @@ document.addEventListener('DOMContentLoaded', function () {
     // Busca as estatísticas iniciais e configura a atualização periódica
     fetchUpdatedStats();
     setInterval(fetchUpdatedStats, 30000); // Atualiza a cada 30 segundos
-});
+}); 

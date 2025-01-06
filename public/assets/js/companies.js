@@ -1,107 +1,138 @@
 document.addEventListener('DOMContentLoaded', function () {
     // Elementos do DOM
     const addCompanyBtn = document.getElementById('addCompanyBtn');
-    const companyModal = new bootstrap.Modal(document.getElementById('companyModal'));
-    const companyForm = document.getElementById('companyForm');
+    const companyForm = document.getElementById('addEditCompanyForm');
     const saveCompanyBtn = document.getElementById('saveCompanyBtn');
-    const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
-    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
     const searchCnpjBtn = document.getElementById('searchCnpjBtn');
     const cnpjInput = document.getElementById('companyCnpj');
-    const BASE_URL = '/voicehub/public';
+    const companyList = document.getElementById('companyList');
+    const companyDetails = document.getElementById('companyDetails');
+    const companyFormContainer = document.getElementById('companyForm');
+    const editCompanyBtn = document.getElementById('editCompanyBtn');
+    const deleteCompanyBtn = document.getElementById('deleteCompanyBtn');
+    const companySearch = document.getElementById('companySearch');
+    const notificationModal = document.getElementById('notificationModal');
+    const deleteConfirmModal = document.getElementById('deleteConfirmModal');
+    const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+    const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
 
     // Variáveis globais
     let companies = initialCompanies || [];
     let currentCompanyId = null;
 
     // Inicialização
-    renderCompaniesTable();
+    renderCompanyList();
 
     // Event Listeners
-    addCompanyBtn.addEventListener('click', () => openCompanyModal());
-    saveCompanyBtn.addEventListener('click', saveCompany);
-    confirmDeleteBtn.addEventListener('click', deleteCompany);
+    addCompanyBtn.addEventListener('click', showAddCompanyForm);
+    companyForm.addEventListener('submit', saveCompany);
+    cancelBtn.addEventListener('click', hideCompanyForm);
     searchCnpjBtn.addEventListener('click', searchCompanyByCNPJ);
+    editCompanyBtn.addEventListener('click', () => showEditCompanyForm(currentCompanyId));
+    deleteCompanyBtn.addEventListener('click', confirmDeleteCompany);
+    companySearch.addEventListener('input', filterCompanies);
+    confirmDeleteBtn.addEventListener('click', deleteCompany);
+    cancelDeleteBtn.addEventListener('click', closeModal);
+
+    // Adiciona listeners para fechar modais
+    document.querySelectorAll('.close, .modal-close-btn').forEach(element => {
+        element.addEventListener('click', closeModal);
+    });
 
     /**
-     * Renderiza a tabela de empresas
+     * Renderiza a lista de empresas na sidebar
      */
-    function renderCompaniesTable() {
-        const tableBody = document.querySelector('#companiesTable tbody');
-        tableBody.innerHTML = '';
+    function renderCompanyList() {
+        companyList.innerHTML = '';
         companies.forEach(company => {
-            const row = `
-                <tr>
-                    <td>${company.id}</td>
-                    <td>${company.name}</td>
-                    <td>${company.cnpj || ''}</td>
-                    <td>${company.email || ''}</td>
-                    <td>
-                        <button class="btn btn-sm btn-primary edit-btn" data-id="${company.id}">Editar</button>
-                        <button class="btn btn-sm btn-danger delete-btn" data-id="${company.id}">Excluir</button>
-                    </td>
-                </tr>
-            `;
-            tableBody.innerHTML += row;
-        });
-
-        // Adiciona event listeners para os botões de editar e excluir
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => openCompanyModal(e.target.dataset.id));
-        });
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => openDeleteConfirmModal(e.target.dataset.id));
+            const companyItem = document.createElement('div');
+            companyItem.className = 'company-item';
+            companyItem.textContent = company.name;
+            companyItem.addEventListener('click', () => showCompanyDetails(company.id));
+            companyList.appendChild(companyItem);
         });
     }
 
     /**
-     * Abre o modal para adicionar ou editar uma empresa
-     * @param {string|null} companyId - ID da empresa a ser editada, ou null para adicionar nova empresa
+     * Exibe os detalhes de uma empresa selecionada
+     * @param {string} companyId - ID da empresa
      */
-    function openCompanyModal(companyId = null) {
-        currentCompanyId = companyId;
-        const modalTitle = document.getElementById('companyModalLabel');
+    function showCompanyDetails(companyId) {
+        const company = companies.find(c => c.id == companyId);
+        if (company) {
+            currentCompanyId = companyId;
+            document.getElementById('companyNameDisplay').textContent = company.name;
+            document.getElementById('companyTradeNameDisplay').textContent = company.trade_name || 'N/A';
+            document.getElementById('companyCnpjDisplay').textContent = company.cnpj || 'N/A';
+            document.getElementById('companyEmailDisplay').textContent = company.email || 'N/A';
+            document.getElementById('companyPhoneDisplay').textContent = company.phone || 'N/A';
+            document.getElementById('companyAddressDisplay').textContent = `${company.address || ''}, ${company.city || ''}, ${company.state || ''} ${company.zip_code || ''}`;
+            document.getElementById('companyWebsiteDisplay').textContent = company.website || 'N/A';
+            document.getElementById('companyCreatedAtDisplay').textContent = new Date(company.created_at).toLocaleDateString();
 
-        if (companyId) {
-            modalTitle.textContent = 'Editar Empresa';
-            const company = companies.find(c => c.id == companyId);
-            fillCompanyForm(company);
-        } else {
-            modalTitle.textContent = 'Adicionar Empresa';
-            companyForm.reset();
+            companyDetails.style.display = 'block';
+            companyFormContainer.style.display = 'none';
+            gsap.from(companyDetails, { opacity: 0, y: 20, duration: 0.5, ease: "power2.out" });
         }
-
-        companyModal.show();
     }
 
     /**
-     * Preenche o formulário com os dados da empresa
-     * @param {Object} company - Objeto contendo os dados da empresa
+     * Exibe o formulário para adicionar uma nova empresa
      */
-    function fillCompanyForm(company) {
-        document.getElementById('companyName').value = company.name || '';
-        document.getElementById('companyCnpj').value = company.cnpj || '';
-        document.getElementById('companyEmail').value = company.email || '';
-        document.getElementById('companyAddress').value = company.address || '';
-        document.getElementById('companyCity').value = company.city || '';
-        document.getElementById('companyState').value = company.state || '';
-        document.getElementById('companyZipCode').value = company.zip_code || '';
-        document.getElementById('companyPhone').value = company.phone || '';
+    function showAddCompanyForm() {
+        companyForm.reset();
+        document.getElementById('formTitle').textContent = 'Adicionar Nova Empresa';
+        currentCompanyId = null;
+        companyDetails.style.display = 'none';
+        companyFormContainer.style.display = 'block';
+        gsap.from(companyFormContainer, { opacity: 0, y: 20, duration: 0.5, ease: "power2.out" });
     }
 
     /**
-     * Salva uma nova empresa ou atualiza uma existente
+     * Exibe o formulário para editar uma empresa existente
+     * @param {string} companyId - ID da empresa a ser editada
      */
-    function saveCompany() {
+    function showEditCompanyForm(companyId) {
+        const company = companies.find(c => c.id == companyId);
+        if (company) {
+            document.getElementById('formTitle').textContent = 'Editar Empresa';
+            fillCompanyForm(company);
+            companyDetails.style.display = 'none';
+            companyFormContainer.style.display = 'block';
+            gsap.from(companyFormContainer, { opacity: 0, y: 20, duration: 0.5, ease: "power2.out" });
+        }
+    }
+
+    /**
+     * Esconde o formulário e volta para a visualização de detalhes
+     */
+    function hideCompanyForm() {
+        companyFormContainer.style.display = 'none';
+        if (currentCompanyId) {
+            showCompanyDetails(currentCompanyId);
+        } else {
+            companyDetails.style.display = 'block';
+        }
+    }
+
+    /**
+     * Salva ou atualiza uma empresa
+     * @param {Event} e - Evento de submit do formulário
+     */
+    function saveCompany(e) {
+        e.preventDefault();
         const companyData = {
             name: document.getElementById('companyName').value,
+            trade_name: document.getElementById('companyTradeName').value,
             cnpj: document.getElementById('companyCnpj').value,
             email: document.getElementById('companyEmail').value,
+            phone: document.getElementById('companyPhone').value,
+            website: document.getElementById('companyWebsite').value,
             address: document.getElementById('companyAddress').value,
             city: document.getElementById('companyCity').value,
             state: document.getElementById('companyState').value,
-            zip_code: document.getElementById('companyZipCode').value,
-            phone: document.getElementById('companyPhone').value
+            zip_code: document.getElementById('companyZipCode').value
         };
 
         const url = currentCompanyId
@@ -118,75 +149,64 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    companyModal.hide();
                     if (currentCompanyId) {
                         const index = companies.findIndex(c => c.id == currentCompanyId);
                         companies[index] = { ...companies[index], ...companyData, id: currentCompanyId };
                     } else {
-                        companies.push({ ...companyData, id: data.id });
+                        companies.push({ ...companyData, id: data.id, created_at: new Date().toISOString() });
                     }
-                    renderCompaniesTable();
-                    alert(currentCompanyId ? 'Empresa atualizada com sucesso!' : 'Empresa adicionada com sucesso!');
+                    renderCompanyList();
+                    showCompanyDetails(currentCompanyId || data.id);
+                    showNotification(currentCompanyId ? 'Empresa atualizada com sucesso!' : 'Empresa adicionada com sucesso!', 'success');
                 } else {
-                    alert('Erro ao salvar empresa: ' + data.message);
+                    showNotification('Erro ao salvar empresa: ' + data.message, 'error');
                 }
             })
-            .catch(error => console.error('Erro:', error));
+            .catch(error => {
+                console.error('Erro:', error);
+                showNotification('Erro ao salvar empresa. Por favor, tente novamente.', 'error');
+            });
     }
 
     /**
-     * Abre o modal de confirmação para excluir uma empresa
-     * @param {string} companyId - ID da empresa a ser excluída
+     * Confirma a exclusão de uma empresa
      */
-    function openDeleteConfirmModal(companyId) {
-        currentCompanyId = companyId;
-        deleteConfirmModal.show();
+    function confirmDeleteCompany() {
+        showModal(deleteConfirmModal);
     }
 
     /**
-     * Exclui a empresa atualmente selecionada
+     * Exclui uma empresa
      */
     function deleteCompany() {
-        if (confirm('Tem certeza que deseja excluir esta empresa? Esta ação não pode ser desfeita.')) {
-            console.log('Iniciando exclusão da empresa:', currentCompanyId);
-            const url = `${BASE_URL}/companies/delete/${currentCompanyId}`;
-            console.log('URL da requisição:', url);
+        const url = `${BASE_URL}/companies/delete/${currentCompanyId}`;
 
-            fetch(url, {
-                method: 'POST', // Mudamos para POST porque alguns servidores não aceitam DELETE
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    companies = companies.filter(c => c.id != currentCompanyId);
+                    renderCompanyList();
+                    showCompanyDetails(companies[0]?.id);
+                    showNotification('Empresa excluída com sucesso!', 'success');
+                } else {
+                    showNotification('Erro ao excluir empresa: ' + data.message, 'error');
+                }
             })
-                .then(response => {
-                    console.log('Status da resposta:', response.status);
-                    if (!response.ok) {
-                        return response.text().then(text => {
-                            throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
-                        });
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Dados recebidos:', data);
-                    if (data.success) {
-                        companies = companies.filter(c => c.id != currentCompanyId);
-                        renderCompaniesTable();
-                        alert('Empresa excluída com sucesso!');
-                    } else {
-                        alert('Erro ao excluir empresa: ' + data.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro detalhado ao excluir empresa:', error);
-                    alert('Erro ao excluir empresa. Por favor, tente novamente. Detalhes: ' + error.message);
-                });
-        }
+            .catch(error => {
+                console.error('Erro:', error);
+                showNotification('Erro ao excluir empresa. Por favor, tente novamente.', 'error');
+            });
+        closeModal();
     }
 
-
     /**
-     * Busca os dados da empresa pelo CNPJ usando a API
+     * Busca os dados da empresa pelo CNPJ
      */
     function searchCompanyByCNPJ() {
         const cnpj = cnpjInput.value;
@@ -201,10 +221,106 @@ document.addEventListener('DOMContentLoaded', function () {
             .then(data => {
                 if (data.success) {
                     fillCompanyForm(data.data);
+                    showNotification('Dados da empresa carregados com sucesso!', 'success');
                 } else {
-                    alert('Erro ao buscar dados da empresa: ' + data.message);
+                    showNotification('Erro ao buscar dados da empresa: ' + data.message, 'error');
                 }
             })
-            .catch(error => console.error('Erro:', error));
+            .catch(error => {
+                console.error('Erro:', error);
+                showNotification('Erro ao buscar dados da empresa. Por favor, tente novamente.', 'error');
+            });
+    }
+
+    /**
+     * Preenche o formulário com os dados da empresa
+     * @param {Object} data - Dados da empresa
+     */
+    function fillCompanyForm(data) {
+        document.getElementById('companyName').value = data.name || '';
+        document.getElementById('companyTradeName').value = data.trade_name || '';
+        document.getElementById('companyEmail').value = data.email || '';
+        document.getElementById('companyPhone').value = data.phone || '';
+        document.getElementById('companyWebsite').value = data.website || '';
+        document.getElementById('companyAddress').value = data.address || '';
+        document.getElementById('companyCity').value = data.city || '';
+        document.getElementById('companyState').value = data.state || '';
+        document.getElementById('companyZipCode').value = data.zip_code || '';
+    }
+
+    /**
+     * Filtra as empresas com base no texto de busca
+     */
+    function filterCompanies() {
+        const searchText = companySearch.value.toLowerCase();
+        const filteredCompanies = companies.filter(company =>
+            company.name.toLowerCase().includes(searchText) ||
+            (company.cnpj && company.cnpj.includes(searchText))
+        );
+        renderFilteredCompanies(filteredCompanies);
+    }
+
+    /**
+     * Renderiza a lista de empresas filtradas
+     * @param {Array} filteredCompanies - Array de empresas filtradas
+     */
+    function renderFilteredCompanies(filteredCompanies) {
+        companyList.innerHTML = '';
+        filteredCompanies.forEach(company => {
+            const companyItem = document.createElement('div');
+            companyItem.className = 'company-item';
+            companyItem.textContent = company.name;
+            companyItem.addEventListener('click', () => showCompanyDetails(company.id));
+            companyList.appendChild(companyItem);
+        });
+    }
+
+    /**
+     * Exibe uma notificação no modal
+     * @param {string} message - Mensagem a ser exibida
+     * @param {string} type - Tipo de notificação ('success' ou 'error')
+     */
+    function showNotification(message, type) {
+        const title = document.getElementById('notificationTitle');
+        const messageElement = document.getElementById('notificationMessage');
+        const modalContent = notificationModal.querySelector('.modal-content');
+
+        title.textContent = type === 'success' ? 'Sucesso' : 'Erro';
+        messageElement.textContent = message;
+
+        modalContent.className = 'modal-content ' + (type === 'success' ? 'success-modal-content' : 'error-modal-content');
+
+        showModal(notificationModal);
+    }
+
+    /**
+     * Exibe um modal
+     * @param {HTMLElement} modal - Elemento do modal a ser exibido
+     */
+    function showModal(modal) {
+        modal.style.display = 'block';
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+    }
+
+    /**
+     * Fecha todos os modais abertos
+     */
+    function closeModal() {
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.classList.remove('show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 300);
+        });
+    }
+
+    // Fechar modal ao clicar fora dele
+    window.onclick = function (event) {
+        if (event.target.classList.contains('modal')) {
+            closeModal();
+        }
     }
 });

@@ -1,4 +1,10 @@
-// Espera que o DOM esteja completamente carregado antes de executar o script
+/**
+ * Gerenciamento de Permissões de Usuários
+ * 
+ * Este script gerencia a interação do usuário na página de permissões,
+ * incluindo a seleção de usuários, atualização de permissões e manipulação de modais.
+ */
+
 document.addEventListener('DOMContentLoaded', function () {
     // Elementos do DOM
     const userList = document.getElementById('userListContainer');
@@ -17,36 +23,91 @@ document.addEventListener('DOMContentLoaded', function () {
     const loadingIndicator = document.getElementById('loadingIndicator');
     const saveButton = document.querySelector('.btn-save');
     const verifyCodeBtn = document.getElementById('verifyCodeBtn');
-    const DEBUG_MODE = false; // Defina como true quando precisar debugar
 
-    // Variáveis para armazenar dados
+    // Variáveis de estado
     let originalPermissions = {};
     let isVerificationCodeRequested = false;
     let verificationCodeTimeout;
     let verifiedCode = null;
 
-    // Definição das permissões simples e avançadas
+    // Configurações
     const simplePermissions = ['gravacoes', 'transcricoes', 'relatorio_inteligente'];
     const advancedPermissions = ['gerenciar_licencas', 'gerenciar_empresas', 'administrador_sistema'];
+    let currentPage = 1;
+    const usersPerPage = 5;
+    let totalPages = 1;
 
-    // Fila de modais
-    const modalQueue = [];
-    let isModalOpen = false;
+    // Inicialização
+    initializeEventListeners();
+    displayUsers(currentPage);
+    handleUserAvatars();
 
-    // Event Listeners
-    if (userList) userList.addEventListener('click', handleUserClick);
-    if (permissionsForm) permissionsForm.addEventListener('submit', handlePermissionSubmit);
-    if (userSearch) userSearch.addEventListener('input', handleUserSearch);
-    document.getElementById('continueWithoutSaving').addEventListener('click', continueWithoutSaving);
-    document.getElementById('saveChanges').addEventListener('click', saveChanges);
-    document.getElementById('cancelUnsavedChanges').addEventListener('click', cancelUnsavedChanges);
-    document.getElementById('confirmSaveBtn').addEventListener('click', closeSaveConfirmModal);
-    requestVerificationCodeBtn.addEventListener('click', requestVerificationCode);
-    verificationCodeInput.addEventListener('input', handleVerificationCodeInput);
-    verifyCodeBtn.addEventListener('click', verifyCode);
-    document.getElementById('notificationOkBtn').addEventListener('click', closeNotificationModal);
+    /**
+     * Inicializa todos os event listeners necessários
+     */
+    function initializeEventListeners() {
+        if (userList) userList.addEventListener('click', handleUserClick);
+        if (permissionsForm) permissionsForm.addEventListener('submit', handlePermissionSubmit);
+        if (userSearch) userSearch.addEventListener('input', handleUserSearch);
+        document.getElementById('continueWithoutSaving').addEventListener('click', continueWithoutSaving);
+        document.getElementById('saveChanges').addEventListener('click', saveChanges);
+        document.getElementById('cancelUnsavedChanges').addEventListener('click', cancelUnsavedChanges);
+        document.getElementById('confirmSaveBtn').addEventListener('click', closeSaveConfirmModal);
+        requestVerificationCodeBtn.addEventListener('click', requestVerificationCode);
+        verificationCodeInput.addEventListener('input', handleVerificationCodeInput);
+        verifyCodeBtn.addEventListener('click', verifyCode);
+        document.getElementById('notificationOkBtn').addEventListener('click', closeNotificationModal);
+        document.getElementById('prevPage').addEventListener('click', () => changePage(-1));
+        document.getElementById('nextPage').addEventListener('click', () => changePage(1));
 
-    // Função para animar a transição entre usuários
+        // Event listeners para os botões de fechar modais
+        document.querySelectorAll('.close, .modal-close-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                const modal = this.closest('.modal');
+                hideModal(modal.id);
+            });
+        });
+
+        // Fechar modal clicando fora do conteúdo
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function (event) {
+                if (event.target === this) {
+                    hideModal(this.id);
+                }
+            });
+        });
+    }
+
+    /**
+     * Lida com o clique em um usuário na lista
+     * @param {Event} e - O evento de clique
+     */
+    function handleUserClick(e) {
+        const userItem = e.target.closest('.user-item');
+        if (userItem) {
+            if (hasUnsavedChanges()) {
+                showModal('unsavedChangesModal');
+            } else {
+                requestAnimationFrame(() => selectUser(userItem));
+            }
+        }
+    }
+
+    /**
+     * Seleciona um usuário e carrega suas permissões
+     * @param {HTMLElement} userItem - O elemento do usuário clicado
+     */
+    function selectUser(userItem) {
+        document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
+        userItem.classList.add('active');
+        selectedUserId.value = userItem.dataset.userId;
+        animateUserTransition(() => fetchUserPermissions(userItem.dataset.userId));
+    }
+
+    /**
+     * Anima a transição entre usuários
+     * @param {Function} callback - Função a ser executada após a animação
+     */
     function animateUserTransition(callback) {
         const permissionsPanel = document.querySelector('.permissions-panel');
         permissionsPanel.style.opacity = '0';
@@ -58,27 +119,10 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 300);
     }
 
-    // Função para lidar com o clique em um usuário na lista
-    function handleUserClick(e) {
-        const userItem = e.target.closest('.user-item');
-        if (userItem) {
-            if (hasUnsavedChanges()) {
-                showModal(unsavedChangesModal);
-            } else {
-                requestAnimationFrame(() => selectUser(userItem));
-            }
-        }
-    }
-
-    // Função para selecionar um usuário
-    function selectUser(userItem) {
-        document.querySelectorAll('.user-item').forEach(item => item.classList.remove('active'));
-        userItem.classList.add('active');
-        selectedUserId.value = userItem.dataset.userId;
-        animateUserTransition(() => fetchUserPermissions(userItem.dataset.userId));
-    }
-
-    // Função para buscar as permissões do usuário selecionado
+    /**
+     * Busca as permissões do usuário selecionado
+     * @param {string} userId - ID do usuário selecionado
+     */
     function fetchUserPermissions(userId) {
         if (!userId) {
             console.error('User ID is not defined');
@@ -115,7 +159,10 @@ document.addEventListener('DOMContentLoaded', function () {
             .finally(hideLoading);
     }
 
-    // Função para renderizar as permissões na interface
+    /**
+     * Renderiza as permissões na interface
+     * @param {Object} data - Dados das permissões do usuário
+     */
     function renderPermissions(data) {
         const simpleContainer = document.getElementById('simplePermissionsContainer');
         const advancedContainer = document.getElementById('advancedPermissionsContainer');
@@ -148,7 +195,9 @@ document.addEventListener('DOMContentLoaded', function () {
         toggleSaveButton();
     }
 
-    // Função para adicionar listeners de mudança nas permissões
+    /**
+     * Adiciona listeners de mudança nas permissões
+     */
     function addPermissionChangeListeners() {
         document.querySelectorAll('input[name="permissions[]"]').forEach(checkbox => {
             checkbox.addEventListener('change', function () {
@@ -158,7 +207,10 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Função para animar a mudança de permissão
+    /**
+     * Anima a mudança de permissão
+     * @param {HTMLElement} checkbox - O checkbox que foi alterado
+     */
     function animatePermissionChange(checkbox) {
         const permissionItem = checkbox.closest('.permission-item');
         permissionItem.classList.add('permission-changed');
@@ -167,13 +219,18 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 300);
     }
 
-    // Função para habilitar/desabilitar o botão de salvar
+    /**
+     * Habilita/desabilita o botão de salvar
+     */
     function toggleSaveButton() {
         const hasChanges = hasUnsavedChanges();
         saveButton.disabled = !hasChanges;
     }
 
-    // Função para lidar com o envio do formulário de permissões
+    /**
+     * Lida com o envio do formulário de permissões
+     * @param {Event} e - O evento de submit
+     */
     function handlePermissionSubmit(e) {
         e.preventDefault();
         const hasAdvancedPermission = advancedPermissions.some(permission =>
@@ -186,7 +243,9 @@ document.addEventListener('DOMContentLoaded', function () {
         updateUserPermissions();
     }
 
-    // Função para atualizar as permissões do usuário
+    /**
+     * Atualiza as permissões do usuário
+     */
     function updateUserPermissions() {
         const userId = selectedUserId.value;
         if (!userId) {
@@ -229,7 +288,9 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    // Função para solicitar o código de verificação
+    /**
+     * Solicita o código de verificação
+     */
     function requestVerificationCode() {
         if (!confirm('Tem certeza que deseja solicitar um código de verificação? Um e-mail será enviado ao administrador.')) {
             return;
@@ -241,7 +302,6 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
 
-        // Verificar se alguma permissão avançada foi selecionada
         const hasAdvancedPermissionSelected = advancedPermissions.some(permission => {
             const checkbox = document.querySelector(`input[name="permissions[]"][value="${permission}"]`);
             return checkbox && checkbox.checked;
@@ -280,12 +340,16 @@ document.addEventListener('DOMContentLoaded', function () {
             });
     }
 
-    // Função para lidar com a entrada do código de verificação
+    /**
+     * Lida com a entrada do código de verificação
+     */
     function handleVerificationCodeInput() {
         toggleSaveButton();
     }
 
-    // Função para verificar o código
+    /**
+     * Verifica o código de verificação
+     */
     function verifyCode() {
         const code = verificationCodeInput.value;
         const userId = selectedUserId.value;
@@ -323,17 +387,29 @@ document.addEventListener('DOMContentLoaded', function () {
             .finally(hideLoading);
     }
 
-    // Função para lidar com a pesquisa de usuários
+    /**
+     * Lida com a pesquisa de usuários
+     * @param {Event} e - O evento de input
+     */
     function handleUserSearch(e) {
         const searchTerm = e.target.value.toLowerCase();
-        document.querySelectorAll('.user-item').forEach(item => {
+        const userItems = document.querySelectorAll('.user-item');
+
+        userItems.forEach(item => {
             const userName = item.querySelector('.user-name').textContent.toLowerCase();
             const userEmail = item.querySelector('.user-email').textContent.toLowerCase();
-            item.style.display = userName.includes(searchTerm) || userEmail.includes(searchTerm) ? '' : 'none';
+            item.style.display = userName.includes(searchTerm) || userEmail.includes(searchTerm) ? 'flex' : 'none';
         });
+
+        currentPage = 1;
+        displayUsers(currentPage);
     }
 
-    // Função para mostrar notificações
+    /**
+     * Mostra uma notificação
+     * @param {string} message - A mensagem a ser exibida
+     * @param {string} type - O tipo de notificação (success, error, warning)
+     */
     function showNotification(message, type) {
         const title = document.getElementById('notificationTitle');
         const messageElement = document.getElementById('notificationMessage');
@@ -341,10 +417,13 @@ document.addEventListener('DOMContentLoaded', function () {
         title.textContent = type.charAt(0).toUpperCase() + type.slice(1);
         messageElement.textContent = message;
 
-        showModal(notificationModal);
+        showModal('notificationModal');
     }
 
-    // Função para verificar se há mudanças não salvas
+    /**
+     * Verifica se há mudanças não salvas
+     * @returns {boolean} - True se houver mudanças não salvas, false caso contrário
+     */
     function hasUnsavedChanges() {
         const currentPermissions = {};
         document.querySelectorAll('#permissionsForm input[type="checkbox"]').forEach(checkbox => {
@@ -353,24 +432,33 @@ document.addEventListener('DOMContentLoaded', function () {
         return JSON.stringify(currentPermissions) !== JSON.stringify(originalPermissions);
     }
 
-    // Função para continuar sem salvar as alterações
+    /**
+     * Continua sem salvar as alterações
+     */
     function continueWithoutSaving() {
-        hideModal(unsavedChangesModal);
+        hideModal('unsavedChangesModal');
         selectUser(document.querySelector('.user-item.active'));
     }
 
-    // Função para salvar as alterações
+    /**
+     * Salva as alterações
+     */
     function saveChanges() {
-        hideModal(unsavedChangesModal);
+        hideModal('unsavedChangesModal');
         updateUserPermissions();
     }
 
-    // Função para cancelar as alterações não salvas
+    /**
+     * Cancela as alterações não salvas
+     */
     function cancelUnsavedChanges() {
-        hideModal(unsavedChangesModal);
+        hideModal('unsavedChangesModal');
     }
 
-    // Função para mostrar o modal de confirmação de salvamento
+    /**
+     * Mostra o modal de confirmação de salvamento
+     * @param {Object} updatedPermissions - As permissões atualizadas
+     */
     function showSaveConfirmModal(updatedPermissions) {
         updatedPermissionsList.innerHTML = '';
         Object.entries(updatedPermissions).forEach(([key, value]) => {
@@ -378,30 +466,40 @@ document.addEventListener('DOMContentLoaded', function () {
             li.textContent = `${key}: ${value ? 'Ativado' : 'Desativado'}`;
             updatedPermissionsList.appendChild(li);
         });
-        showModal(saveConfirmModal);
+        showModal('saveConfirmModal');
     }
 
-    // Função para fechar o modal de confirmação de salvamento
+    /**
+     * Fecha o modal de confirmação de salvamento
+     */
     function closeSaveConfirmModal() {
-        hideModal(saveConfirmModal);
+        hideModal('saveConfirmModal');
     }
 
-    // Função para fechar o modal de notificação
+    /**
+     * Fecha o modal de notificação
+     */
     function closeNotificationModal() {
-        hideModal(notificationModal);
+        hideModal('notificationModal');
     }
 
-    // Função para mostrar o indicador de carregamento
+    /**
+     * Mostra o indicador de carregamento
+     */
     function showLoading() {
         loadingIndicator.style.display = 'block';
     }
 
-    // Função para esconder o indicador de carregamento
+    /**
+     * Esconde o indicador de carregamento
+     */
     function hideLoading() {
         loadingIndicator.style.display = 'none';
     }
 
-    // Função para iniciar o timeout do código de verificação
+    /**
+     * Inicia o timeout do código de verificação
+     */
     function startVerificationCodeTimeout() {
         clearTimeout(verificationCodeTimeout);
         verificationCodeTimeout = setTimeout(() => {
@@ -413,54 +511,96 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 10 * 60 * 1000); // 10 minutos
     }
 
-    // Função para adicionar efeito de ripple aos botões
-    function addRippleEffect(button) {
-        button.addEventListener('click', function (e) {
-            let ripple = document.createElement('span');
-            ripple.classList.add('ripple');
-            this.appendChild(ripple);
-            let x = e.clientX - e.target.offsetLeft;
-            let y = e.clientY - e.target.offsetTop;
-            ripple.style.left = `${x}px`;
-            ripple.style.top = `${y}px`;
-            setTimeout(() => {
-                ripple.remove();
-            }, 300);
+    /**
+     * Mostra um modal
+     * @param {string} modalId - O ID do modal a ser exibido
+     */
+    function showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.style.display = 'block';
+        setTimeout(() => {
+            modal.classList.add('show');
+        }, 10);
+        document.body.style.overflow = 'hidden'; // Previne rolagem do body
+    }
+
+    /**
+     * Esconde um modal
+     * @param {string} modalId - O ID do modal a ser escondido
+     */
+    function hideModal(modalId) {
+        const modal = document.getElementById(modalId);
+        modal.classList.remove('show');
+        setTimeout(() => {
+            modal.style.display = 'none';
+        }, 300);
+        document.body.style.overflow = ''; // Restaura rolagem do body
+    }
+
+    /**
+     * Lida com os avatares dos usuários
+     */
+    function handleUserAvatars() {
+        document.querySelectorAll('.user-avatar').forEach(function (img) {
+            img.addEventListener('error', function () {
+                this.src = BASE_URL + '/assets/images/profile.png';
+            });
         });
     }
 
-    // Adicionar efeito de ripple aos botões
-    addRippleEffect(saveButton);
-    addRippleEffect(requestVerificationCodeBtn);
-    addRippleEffect(verifyCodeBtn);
+    /**
+     * Exibe os usuários da página atual
+     * @param {number} page - O número da página atual
+     */
+    function displayUsers(page) {
+        const userItems = document.querySelectorAll('.user-item');
+        const startIndex = (page - 1) * usersPerPage;
+        const endIndex = startIndex + usersPerPage;
 
-    // Função para mostrar modal
-    function showModal(modal) {
-        modalQueue.push(modal);
-        if (!isModalOpen) {
-            displayNextModal();
-        }
+        userItems.forEach((item, index) => {
+            if (index >= startIndex && index < endIndex) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        });
+
+        updatePaginationInfo();
     }
 
-    // Função para exibir o próximo modal na fila
-    function displayNextModal() {
-        if (modalQueue.length === 0) {
-            isModalOpen = false;
-            return;
-        }
+    /**
+     * Atualiza as informações de paginação
+     */
+    function updatePaginationInfo() {
+        const totalUsers = document.querySelectorAll('.user-item').length;
+        totalPages = Math.ceil(totalUsers / usersPerPage);
 
-        isModalOpen = true;
-        const modal = modalQueue.shift();
-        modal.style.display = 'block';
+        document.getElementById('currentPage').textContent = currentPage;
+        document.getElementById('totalPages').textContent = totalPages;
+
+        document.getElementById('prevPage').disabled = currentPage === 1;
+        document.getElementById('nextPage').disabled = currentPage === totalPages;
     }
 
-    // Função para esconder modal
-    function hideModal(modal) {
-        modal.style.display = 'none';
-        displayNextModal();
+    /**
+     * Muda a página de usuários
+     * @param {number} direction - A direção da mudança (-1 para anterior, 1 para próxima)
+     */
+    function changePage(direction) {
+        currentPage += direction;
+        if (currentPage < 1) currentPage = 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        displayUsers(currentPage);
     }
 
-    // Adicionar event listeners para as checkboxes de permissões avançadas
+    // Inicialização de listeners adicionais
+    initializeAdvancedPermissionListeners();
+});
+
+/**
+ * Inicializa os listeners para as permissões avançadas
+ */
+function initializeAdvancedPermissionListeners() {
     document.querySelectorAll('#advancedPermissionsContainer input[type="checkbox"]').forEach(checkbox => {
         checkbox.addEventListener('change', function () {
             const hasAdvancedPermissionSelected = advancedPermissions.some(permission => {
@@ -480,96 +620,4 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     });
-
-    // Função para lidar com os avatares dos usuários
-    function handleUserAvatars() {
-        document.querySelectorAll('.user-avatar').forEach(function (img) {
-            if (DEBUG_MODE) {
-                console.log('Avatar src:', img.src);
-                console.log('Original src:', img.dataset.originalSrc);
-            }
-            img.addEventListener('error', function () {
-                if (DEBUG_MODE) {
-                    console.log('Failed to load:', this.src);
-                }
-                this.src = BASE_URL + '/assets/images/profile.png';
-            });
-        });
-    }
-
-    // Chamar a função para lidar com os avatares dos usuários
-    handleUserAvatars();
-});
-
-// Variáveis de paginação
-let currentPage = 1;
-const usersPerPage = 5;
-let totalPages = 1;
-
-// Função para exibir os usuários da página atual
-function displayUsers(page) {
-    const userItems = document.querySelectorAll('.user-item');
-    const startIndex = (page - 1) * usersPerPage;
-    const endIndex = startIndex + usersPerPage;
-
-    userItems.forEach((item, index) => {
-        if (index >= startIndex && index < endIndex) {
-            item.style.display = 'flex';
-        } else {
-            item.style.display = 'none';
-        }
-    });
-
-    updatePaginationInfo();
 }
-
-// Função para atualizar as informações de paginação
-function updatePaginationInfo() {
-    const totalUsers = document.querySelectorAll('.user-item').length;
-    totalPages = Math.ceil(totalUsers / usersPerPage);
-
-    document.getElementById('currentPage').textContent = currentPage;
-    document.getElementById('totalPages').textContent = totalPages;
-
-    document.getElementById('prevPage').disabled = currentPage === 1;
-    document.getElementById('nextPage').disabled = currentPage === totalPages;
-}
-
-// Event listeners para os botões de paginação
-document.getElementById('prevPage').addEventListener('click', () => {
-    if (currentPage > 1) {
-        currentPage--;
-        displayUsers(currentPage);
-    }
-});
-
-document.getElementById('nextPage').addEventListener('click', () => {
-    if (currentPage < totalPages) {
-        currentPage++;
-        displayUsers(currentPage);
-    }
-});
-
-// Chamar displayUsers no carregamento inicial
-document.addEventListener('DOMContentLoaded', function () {
-    displayUsers(currentPage);
-    // ... (resto do seu código existente)
-});
-
-// Atualizar a função de busca para resetar a paginação
-function handleUserSearch(e) {
-    const searchTerm = e.target.value.toLowerCase();
-    const userItems = document.querySelectorAll('.user-item');
-
-    userItems.forEach(item => {
-        const userName = item.querySelector('.user-name').textContent.toLowerCase();
-        const userEmail = item.querySelector('.user-email').textContent.toLowerCase();
-        item.style.display = userName.includes(searchTerm) || userEmail.includes(searchTerm) ? 'flex' : 'none';
-    });
-
-    currentPage = 1;
-    displayUsers(currentPage);
-}
-
-// Atualizar o event listener de busca
-if (userSearch) userSearch.addEventListener('input', handleUserSearch);

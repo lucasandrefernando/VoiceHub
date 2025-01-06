@@ -305,4 +305,4 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.style.display = 'none';
         modal.querySelector('.modal-content').classList.remove('success-animation');
     }
-});
+}); 
